@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="SGA-Edu — Sistema de Gestão Acadêmica e Escolar. Painel inicial institucional com atalhos operacionais e gestão de professores."
+    />
+    <title>SGA-Edu | Sistema de Gestão Acadêmica — Tela Inicial</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Link para pular navegação direto ao conteúdo principal (Acessibilidade WCAG AA) -->
+    <a href="#conteudo-principal" class="pular-navegacao">Pular para o conteúdo principal</a>
+
+    <!-- Navbar Institucional -->
+    <header class="navbar-institucional" role="banner">
+      <div class="container navbar-conteudo">
+        <!-- Logo e Nome SGA-Edu -->
+        <a class="logo" href="index.html" aria-label="SGA-Edu, página inicial institucional">
+          <span class="logo-icone" aria-hidden="true">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M22 10 12 5 2 10l10 5 10-5z" />
+              <path d="M6 12v5c3 2 9 2 12 0v-5" />
+            </svg>
+          </span>
+          <span class="logo-textos">
+            <span class="logo-nome">SGA-Edu</span>
+            <span class="logo-sub">Portal acadêmico</span>
+          </span>
+        </a>
+
+        <!-- Indicador de Status do Sistema -->
+        <div class="status-sistema" role="status" aria-live="polite" aria-label="Status operacional do sistema">
+          <span class="status-bolinha" id="status-bolinha" aria-hidden="true"></span>
+          <span class="status-texto" id="status-texto">Sistema Operacional</span>
+        </div>
+
+        <!-- Menu de Navegação -->
+        <nav class="menu-navegacao" aria-label="Navegação institucional principal">
+          <ul class="nav-lista">
+            <li><a href="index.html" class="nav-link ativo" aria-current="page">Início</a></li>
+            <li><a href="../cadastrar_professor/index.html" class="nav-link">Professores</a></li>
+            <li><a href="#modulos-futuros" class="nav-link">Módulos</a></li>
+            <li><a href="../login/index.html" class="nav-link nav-link-login" aria-label="Acessar tela de login">Entrar</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="conteudo-principal">
+      <!-- Seção Hero: Saudação e Data Atual -->
+      <section class="secao-hero" aria-labelledby="saudacao-titulo">
+        <div class="container hero-conteudo">
+          <div class="hero-textos">
+            <div class="saudacao-badge" aria-hidden="true">Painel de Controle</div>
+            <h1 id="saudacao-titulo" class="saudacao-titulo">
+              <span id="texto-saudacao">Bem-vindo</span> ao SGA-Edu
+            </h1>
+            <p class="saudacao-sub">
+              Sistema Integrado de Gestão Acadêmica. Acesse abaixo os atalhos de gestão e o corpo docente da instituição.
+            </p>
+          </div>
+
+          <!-- Data Atual com semântica <time> -->
+          <div class="hero-data-card" aria-label="Data atual do sistema">
+            <div class="data-icone-circulo" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+            </div>
+            <div class="data-detalhes">
+              <span class="data-rotulo">Calendário Institucional</span>
+              <time class="data-texto" id="data-atual" datetime="2026-09-30">Quarta-feira, 30 de setembro de 2026</time>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Seção de Contadores / Resumos Rápidos -->
+      <section class="secao-resumo container" aria-label="Indicadores gerais do sistema acadêmico">
+        <div class="grid-resumo">
+          <!-- Contador de Professores Ativos -->
+          <div class="card-resumo">
+            <div class="resumo-icone-wrap" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </div>
+            <div class="resumo-info">
+              <span class="resumo-numero" id="contador-professores">3</span>
+              <span class="resumo-rotulo">Professores Ativos</span>
+            </div>
+          </div>
+
+          <!-- Período Letivo -->
+          <div class="card-resumo">
+            <div class="resumo-icone-wrap" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            </div>
+            <div class="resumo-info">
+              <span class="resumo-numero">2026.2</span>
+              <span class="resumo-rotulo">Período Semestral</span>
+            </div>
+          </div>
+
+          <!-- Departamentos -->
+          <div class="card-resumo">
+            <div class="resumo-icone-wrap" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+              </svg>
+            </div>
+            <div class="resumo-info">
+              <span class="resumo-numero">4</span>
+              <span class="resumo-rotulo">Departamentos Ativos</span>
+            </div>
+          </div>
+
+          <!-- Módulos Operacionais -->
+          <div class="card-resumo">
+            <div class="resumo-icone-wrap" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <div class="resumo-info">
+              <span class="resumo-numero">2</span>
+              <span class="resumo-rotulo">Módulos em Produção</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Seção Principal de Módulos (Cards de Acesso) -->
+      <section class="secao-modulos container" aria-labelledby="titulo-secao-modulos">
+        <div class="cabecalho-secao">
+          <h2 id="titulo-secao-modulos" class="titulo-secao">
+            Módulos e Recursos do Sistema
+          </h2>
+          <p class="subtitulo-secao">
+            Navegue pelos módulos disponíveis e consulte o cronograma das próximas entregas.
+          </p>
+        </div>
+
+        <div class="grid-modulos">
+          <!-- CARD DE PROFESSORES (GL4-34) - DESTAQUE PRINCIPAL -->
+          <article class="card-modulo card-destaque" aria-labelledby="titulo-card-professores">
+            <div>
+              <div class="card-topo">
+                <div class="card-icone-wrap" aria-hidden="true">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 10 12 5 2 10l10 5 10-5z" />
+                    <path d="M6 12v5c3 2 9 2 12 0v-5" />
+                  </svg>
+                </div>
+                <span class="badge-modulo badge-ativo">Módulo Ativo</span>
+              </div>
+              <h3 id="titulo-card-professores" class="card-titulo">Gestão de Professores</h3>
+              <p class="card-descricao">
+                Cadastro seguro de docentes com verificação cadastral de CPF, alocação em departamentos acadêmicos e gestão de titulações.
+              </p>
+            </div>
+
+            <div>
+              <!-- Contador de professores ativos no card -->
+              <div class="card-estatistica" aria-label="Total de professores ativos">
+                <span class="estatistica-valor" id="card-prof-count">3</span>
+                <span class="estatistica-rotulo">professores ativos cadastrados no sistema</span>
+              </div>
+
+              <!-- Botões com rotas reais existentes do módulo GL4-34 -->
+              <div class="card-acoes">
+                <a
+                  href="../cadastrar_professor/index.html"
+                  class="btn btn-primario"
+                  id="btn-novo-professor"
+                  aria-label="Ir para formulário de cadastro de novo professor"
+                >
+                  <span aria-hidden="true">+</span> Novo Professor
+                </a>
+                <a
+                  href="../cadastrar_professor/index.html#tabela-professores"
+                  class="btn btn-secundario"
+                  id="btn-consultar-professores"
+                  aria-label="Consultar tabela de professores cadastrados"
+                >
+                  Consultar Professores
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <!-- CARD MÓDULO FUTURO 1: Turmas & Matrículas -->
+          <article class="card-modulo card-futuro" id="modulos-futuros" aria-labelledby="titulo-card-turmas">
+            <div>
+              <div class="card-topo">
+                <div class="card-icone-wrap" aria-hidden="true">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                  </svg>
+                </div>
+                <span class="badge-modulo badge-planejado">Em Breve</span>
+              </div>
+              <h3 id="titulo-card-turmas" class="card-titulo">Turmas & Horários</h3>
+              <p class="card-descricao">
+                Organização de salas de aula, enturmação de alunos, horários letivos e alocação de docentes por período.
+              </p>
+            </div>
+            <div class="card-acoes">
+              <button class="btn btn-desabilitado" disabled aria-disabled="true">
+                Módulo em Planejamento
+              </button>
+            </div>
+          </article>
+
+          <!-- CARD MÓDULO FUTURO 2: Cursos & Disciplinas -->
+          <article class="card-modulo card-futuro" aria-labelledby="titulo-card-cursos">
+            <div>
+              <div class="card-topo">
+                <div class="card-icone-wrap" aria-hidden="true">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                    <polyline points="2 17 12 22 22 17" />
+                    <polyline points="2 12 12 17 22 12" />
+                  </svg>
+                </div>
+                <span class="badge-modulo badge-planejado">Em Breve</span>
+              </div>
+              <h3 id="titulo-card-cursos" class="card-titulo">Cursos & Disciplinas</h3>
+              <p class="card-descricao">
+                Estruturação curricular, grades disciplinares, ementas de matérias e requisitos pedagógicos institucionais.
+              </p>
+            </div>
+            <div class="card-acoes">
+              <button class="btn btn-desabilitado" disabled aria-disabled="true">
+                Módulo em Planejamento
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <!-- Rodapé Institucional -->
+    <footer class="rodape-institucional" role="contentinfo">
+      <div class="container">
+        <div class="rodape-grade">
+          <div class="rodape-coluna-info">
+            <div class="rodape-logo">SGA-Edu</div>
+            <p>
+              Sistema de Gestão Acadêmica e Escolar. Plataforma institucional orientada a transparência, conformidade com a LGPD e governança educacional.
+            </p>
+          </div>
+
+          <div class="rodape-links">
+            <div>
+              <h4 class="rodape-grupo-titulo">Módulos do Sistema</h4>
+              <ul class="rodape-lista-links">
+                <li><a href="index.html">Tela Inicial (GL4-30)</a></li>
+                <li><a href="../cadastrar_professor/index.html">Cadastro de Professores (GL4-34)</a></li>
+                <li><a href="../login/index.html">Portal de Acesso / Login</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 class="rodape-grupo-titulo">Ajuda & Secretaria</h4>
+              <ul class="rodape-lista-links">
+                <li><a href="#ajuda">Guia do Usuário</a></li>
+                <li><a href="#suporte">Suporte da Secretaria</a></li>
+                <li><a href="#privacidade">Política de Privacidade</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="rodape-inferior">
+          <span>&copy; 2026 SGA-Edu. Todos os direitos reservados.</span>
+          <span>Versão 0.1.0 • Módulos GL4-30 e GL4-34</span>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Lógica de interação da tela inicial -->
+    <script src="script.js"></script>
+  </body>
+</html>

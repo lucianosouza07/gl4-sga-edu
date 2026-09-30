@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="SGA-Edu, portal acadêmico. Entre com seu usuário e senha para acessar o portal."
+    />
+    <title>SGA-Edu | Portal acadêmico — Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../login/style.css" />
+  </head>
+  <body>
+    <div class="pagina">
+      <header class="topo">
+        <a class="logo" href="index.html" aria-label="SGA-Edu, ir para a página inicial">
+          <span class="logo-icone" aria-hidden="true">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M22 10 12 5 2 10l10 5 10-5z" />
+              <path d="M6 12v5c3 2 9 2 12 0v-5" />
+            </svg>
+          </span>
+          <span>
+            <span class="logo-nome">SGA-Edu</span>
+            <span class="logo-sub">Portal acadêmico</span>
+          </span>
+        </a>
+
+        <div class="topo-arte" aria-hidden="true">
+          <svg
+            viewBox="0 0 320 260"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <!-- brilhos -->
+            <g class="brilhos">
+              <path d="M62 70v12M56 76h12" />
+              <path d="M262 36v10M257 41h10" />
+              <path d="M44 146v8M40 150h8" />
+              <circle cx="286" cy="176" r="2.5" />
+              <circle cx="96" cy="40" r="2" />
+            </g>
+
+            <!-- capelo flutuando -->
+            <g class="capelo">
+              <path
+                d="M160 40 L220 64 L160 88 L100 64 Z"
+                fill="rgba(255,255,255,.1)"
+              />
+              <path d="M128 76v18c18 11 46 11 64 0V76" />
+              <path d="M220 64v26" />
+              <circle cx="220" cy="94" r="3.5" fill="currentColor" />
+            </g>
+
+            <!-- livro aberto -->
+            <path
+              d="M160 172c-24-10-52-10-76-3v-42c24-7 52-7 76 3z"
+              fill="rgba(255,255,255,.06)"
+            />
+            <path
+              d="M160 172c24-10 52-10 76-3v-42c-24-7-52-7-76 3z"
+              fill="rgba(255,255,255,.06)"
+            />
+            <path d="M160 130v42" />
+            <g class="linhas" stroke-width="1.5">
+              <path d="M98 140c14-3 32-3 48 1" />
+              <path d="M98 151c14-3 32-3 48 1" />
+              <path d="M98 162c10-2 20-2 30 0" />
+              <path d="M174 141c16-4 34-4 48-1" />
+              <path d="M174 152c16-4 34-4 48-1" />
+            </g>
+
+            <!-- pilha de livros -->
+            <rect
+              x="72"
+              y="176"
+              width="176"
+              height="26"
+              rx="4"
+              fill="rgba(255,255,255,.08)"
+            />
+            <path d="M92 176v26" />
+            <rect
+              x="58"
+              y="202"
+              width="204"
+              height="28"
+              rx="4"
+              fill="rgba(255,255,255,.12)"
+            />
+            <path d="M80 202v28M240 208v16" />
+
+            <!-- lápis -->
+            <g transform="rotate(32 272 140)">
+              <rect
+                x="265"
+                y="92"
+                width="14"
+                height="70"
+                rx="2"
+                fill="rgba(255,255,255,.1)"
+              />
+              <path d="M265 104h14" />
+              <path d="M265 162l7 14 7-14" />
+            </g>
+          </svg>
+        </div>
+      </header>
+
+      <div class="lado-acesso">
+        <main class="principal">
+          <section class="acesso" aria-labelledby="titulo-acesso">
+            <h1 id="titulo-acesso">Bem-vindo ao SGA-Edu</h1>
+            <p>Entre com seu usuário e senha para continuar.</p>
+
+            <form class="form-login" action="login.html" method="post">
+              <div class="campo">
+                <label for="usuario">Usuário</label>
+                <input
+                  id="usuario"
+                  name="usuario"
+                  type="text"
+                  autocomplete="username"
+                  placeholder="Matrícula ou e-mail"
+                  required
+                />
+              </div>
+
+              <div class="campo">
+                <label for="senha">Senha</label>
+                <input
+                  id="senha"
+                  name="senha"
+                  type="password"
+                  autocomplete="current-password"
+                  placeholder="Digite sua senha"
+                  required
+                />
+              </div>
+
+              <button class="btn btn-primario" type="submit">Entrar</button>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                <a class="link-senha" href="#recuperar-senha">Esqueci minha senha</a>
+                <a class="voltar-inicio-link" href="index.html">← Voltar ao início</a>
+              </div>
+            </form>
+          </section>
+        </main>
+
+        <footer class="rodape">
+          <p>Dúvidas para acessar? Procure a secretaria da sua instituição.</p>
+        </footer>
+      </div>
+    </div>
+  </body>
+</html>
