@@ -1,0 +1,285 @@
+/* =========================================================
+   SGA-Edu — Estilos Globais (React + TypeScript)
+   Reaproveitados de tela_inicial/style.css e
+   cadastrar_professor/style.css
+   ========================================================= */
+
+/* ---------- Reset & Base ---------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --vinho: #5b1f33;
+  --vinho-escuro: #4a1829;
+  --vinho-claro: #d9b9c3;
+  --vinho-suave: #f9f2f4;
+  --fundo: #faf8f4;
+  --branco: #ffffff;
+  --borda: #ebe6df;
+  --texto: #1a202c;
+  --texto-suave: #4a5568;
+  --sucesso: #2d6a4f;
+  --sucesso-bg: #d8f3dc;
+  --erro: #c62828;
+  --erro-bg: #fde8e8;
+  --aviso: #7b5e00;
+  --aviso-bg: #fff8e1;
+  --titulo: "Poppins", system-ui, -apple-system, sans-serif;
+  --corpo: "Inter", system-ui, -apple-system, sans-serif;
+  --raio: 12px;
+  --raio-sm: 8px;
+  --sombra: 0 2px 8px rgba(91,31,51,.08);
+  --sombra-md: 0 4px 16px rgba(91,31,51,.12);
+  --transicao: .2s ease;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--corpo); background: var(--fundo); color: var(--texto); line-height: 1.6; min-height: 100vh; }
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; font-family: inherit; }
+img { max-width: 100%; display: block; }
+ul, ol { list-style: none; }
+
+/* ---------- Container ---------- */
+.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 1.25rem; }
+
+/* =========================================================
+   NAVBAR INSTITUCIONAL (GL4-30)
+   ========================================================= */
+.navbar-institucional {
+  background: var(--vinho);
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,.15);
+}
+.navbar-conteudo {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .75rem 0; gap: 1rem;
+}
+.logo { display: flex; align-items: center; gap: .75rem; }
+.logo-icone {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem;
+}
+.logo-textos { display: flex; flex-direction: column; }
+.logo-nome { font-family: var(--titulo); font-size: 1.1rem; font-weight: 700; color: #fff; line-height: 1.2; }
+.logo-sub { font-size: .7rem; color: rgba(255,255,255,.7); letter-spacing: .05em; text-transform: uppercase; }
+.status-sistema { display: flex; align-items: center; gap: .4rem; }
+.status-bolinha {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #4caf50; box-shadow: 0 0 0 2px rgba(76,175,80,.3);
+}
+.status-bolinha.offline { background: #f44336; box-shadow: 0 0 0 2px rgba(244,67,54,.3); }
+.status-texto { font-size: .78rem; color: rgba(255,255,255,.8); }
+.menu-navegacao { display: flex; align-items: center; }
+.nav-lista { display: flex; gap: .25rem; }
+.nav-link {
+  padding: .45rem .85rem; border-radius: var(--raio-sm);
+  font-size: .85rem; font-weight: 500; color: rgba(255,255,255,.8);
+  border: none; background: transparent;
+  transition: background var(--transicao), color var(--transicao);
+}
+.nav-link:hover, .nav-link.ativo { background: rgba(255,255,255,.15); color: #fff; }
+.nav-link-login {
+  padding: .45rem .85rem; border-radius: var(--raio-sm);
+  font-size: .85rem; font-weight: 600; color: var(--vinho);
+  background: #fff; border: none;
+  transition: background var(--transicao), color var(--transicao);
+}
+.nav-link-login:hover { background: var(--vinho-claro); }
+
+/* =========================================================
+   HERO DASHBOARD (GL4-30)
+   ========================================================= */
+.hero-dashboard {
+  background: linear-gradient(135deg, var(--vinho) 0%, var(--vinho-escuro) 100%);
+  color: #fff; padding: 2.5rem 0 3rem;
+}
+.hero-conteudo { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem; }
+.hero-saudacao { font-size: .9rem; opacity: .8; margin-bottom: .25rem; }
+.hero-titulo { font-family: var(--titulo); font-size: 1.8rem; font-weight: 700; line-height: 1.2; }
+.hero-data { font-size: .85rem; opacity: .7; margin-top: .35rem; }
+.hero-metricas { display: flex; gap: 1rem; flex-wrap: wrap; }
+.metrica-card {
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+  border-radius: var(--raio); padding: 1rem 1.25rem; text-align: center; min-width: 110px;
+}
+.metrica-numero { font-family: var(--titulo); font-size: 1.8rem; font-weight: 700; }
+.metrica-rotulo { font-size: .75rem; opacity: .8; margin-top: .15rem; }
+
+/* =========================================================
+   SEÇÃO DE MÓDULOS (GL4-30)
+   ========================================================= */
+.secao-modulos { padding: 2.5rem 0; }
+.secao-titulo { font-family: var(--titulo); font-size: 1.3rem; font-weight: 600; color: var(--vinho); margin-bottom: 1.25rem; }
+.grade-modulos { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+
+/* ---------- Card de Módulo ---------- */
+.card-modulo {
+  background: var(--branco); border: 1px solid var(--borda);
+  border-radius: var(--raio); padding: 1.5rem;
+  box-shadow: var(--sombra);
+  display: flex; flex-direction: column; gap: .75rem;
+  transition: box-shadow var(--transicao), transform var(--transicao);
+}
+.card-modulo:hover { box-shadow: var(--sombra-md); transform: translateY(-2px); }
+.card-modulo-topo { display: flex; align-items: center; gap: .85rem; }
+.card-icone {
+  width: 46px; height: 46px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+  background: var(--vinho-suave);
+}
+.card-info { flex: 1; }
+.card-nome { font-family: var(--titulo); font-size: 1rem; font-weight: 600; color: var(--texto); }
+.card-descricao { font-size: .82rem; color: var(--texto-suave); line-height: 1.5; }
+.card-contador { font-size: .78rem; color: var(--vinho); font-weight: 600; }
+.badge-em-breve {
+  display: inline-block; padding: .2rem .6rem; border-radius: 50px;
+  background: var(--aviso-bg); color: var(--aviso);
+  font-size: .72rem; font-weight: 600;
+}
+.badge-ativo {
+  display: inline-block; padding: .2rem .6rem; border-radius: 50px;
+  background: var(--sucesso-bg); color: var(--sucesso);
+  font-size: .72rem; font-weight: 600;
+}
+.card-acoes { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: .25rem; }
+
+/* ---------- Botões ---------- */
+.btn { display: inline-flex; align-items: center; gap: .4rem; border: none; border-radius: var(--raio-sm); padding: .55rem 1rem; font-size: .85rem; font-weight: 600; transition: background var(--transicao), opacity var(--transicao); }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+.btn-primario { background: var(--vinho); color: #fff; }
+.btn-primario:hover:not(:disabled) { background: var(--vinho-escuro); }
+.btn-secundario { background: var(--vinho-suave); color: var(--vinho); }
+.btn-secundario:hover:not(:disabled) { background: var(--vinho-claro); }
+.btn-perigo { background: var(--erro-bg); color: var(--erro); }
+.btn-perigo:hover:not(:disabled) { background: #fcc; }
+.btn-sm { padding: .35rem .7rem; font-size: .78rem; }
+
+/* =========================================================
+   RODAPÉ (GL4-30)
+   ========================================================= */
+.rodape {
+  background: var(--vinho-escuro); color: rgba(255,255,255,.75);
+  padding: 1.25rem 0; margin-top: auto;
+  font-size: .8rem; text-align: center;
+}
+.rodape-conteudo { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .5rem; }
+
+/* =========================================================
+   LOGIN (GL4-34 login preserve)
+   ========================================================= */
+.pagina-login {
+  min-height: 100vh; background: var(--vinho);
+  display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+}
+.login-card {
+  background: var(--branco); border-radius: var(--raio); padding: 2.5rem;
+  width: 100%; max-width: 400px; box-shadow: var(--sombra-md);
+}
+.login-logo { text-align: center; margin-bottom: 1.75rem; }
+.login-titulo { font-family: var(--titulo); font-size: 1.5rem; font-weight: 700; color: var(--vinho); }
+.login-sub { font-size: .85rem; color: var(--texto-suave); margin-top: .25rem; }
+.login-form { display: flex; flex-direction: column; gap: 1rem; }
+.login-form label { font-size: .85rem; font-weight: 600; color: var(--texto); display: block; margin-bottom: .3rem; }
+.login-form input {
+  width: 100%; padding: .65rem .9rem; border: 1px solid var(--borda);
+  border-radius: var(--raio-sm); font-size: .9rem;
+  transition: border-color var(--transicao), box-shadow var(--transicao);
+}
+.login-form input:focus { outline: none; border-color: var(--vinho); box-shadow: 0 0 0 3px rgba(91,31,51,.15); }
+.login-btn { background: var(--vinho); color: #fff; border: none; border-radius: var(--raio-sm); padding: .75rem; font-size: .95rem; font-weight: 600; width: 100%; margin-top: .5rem; }
+.login-btn:hover { background: var(--vinho-escuro); }
+
+/* =========================================================
+   CADASTRO DE PROFESSORES (GL4-34)
+   ========================================================= */
+.pagina-professores { padding: 2rem 0 3rem; }
+.pagina-cabecalho { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.75rem; }
+.pagina-cabecalho h1 { font-family: var(--titulo); font-size: 1.4rem; color: var(--vinho); }
+
+/* ---------- Alerta / Notificações ---------- */
+.alerta {
+  padding: .75rem 1rem; border-radius: var(--raio-sm);
+  font-size: .87rem; margin-bottom: 1rem;
+  display: flex; align-items: center; gap: .5rem;
+}
+.alerta-sucesso { background: var(--sucesso-bg); color: var(--sucesso); }
+.alerta-erro    { background: var(--erro-bg); color: var(--erro); }
+
+/* ---------- Formulário ---------- */
+.form-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; padding: 1rem;
+}
+.form-modal {
+  background: var(--branco); border-radius: var(--raio);
+  width: 100%; max-width: 560px; padding: 2rem;
+  box-shadow: var(--sombra-md); max-height: 90vh; overflow-y: auto;
+}
+.form-modal h2 { font-family: var(--titulo); font-size: 1.2rem; color: var(--vinho); margin-bottom: 1.25rem; }
+.form-grade { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.form-grade .col-full { grid-column: 1 / -1; }
+.form-grupo label { display: block; font-size: .83rem; font-weight: 600; color: var(--texto); margin-bottom: .3rem; }
+.form-grupo input, .form-grupo select {
+  width: 100%; padding: .6rem .85rem; border: 1px solid var(--borda);
+  border-radius: var(--raio-sm); font-size: .88rem;
+  transition: border-color var(--transicao), box-shadow var(--transicao);
+}
+.form-grupo input:focus, .form-grupo select:focus {
+  outline: none; border-color: var(--vinho); box-shadow: 0 0 0 3px rgba(91,31,51,.15);
+}
+.form-grupo input[aria-invalid="true"] { border-color: var(--erro); }
+.form-acoes { display: flex; justify-content: flex-end; gap: .6rem; margin-top: 1.25rem; }
+
+/* ---------- Tabela de Professores ---------- */
+.tabela-wrapper { overflow-x: auto; border-radius: var(--raio); border: 1px solid var(--borda); }
+.tabela-professores { width: 100%; border-collapse: collapse; font-size: .87rem; }
+.tabela-professores th {
+  background: var(--vinho); color: #fff; padding: .75rem 1rem;
+  text-align: left; font-weight: 600; white-space: nowrap;
+}
+.tabela-professores td { padding: .7rem 1rem; border-bottom: 1px solid var(--borda); vertical-align: middle; }
+.tabela-professores tr:last-child td { border-bottom: none; }
+.tabela-professores tr:hover td { background: var(--vinho-suave); }
+.badge-titulacao {
+  display: inline-block; padding: .2rem .55rem; border-radius: 50px;
+  font-size: .73rem; font-weight: 600;
+  background: var(--vinho-suave); color: var(--vinho);
+}
+.tabela-acoes { display: flex; gap: .4rem; }
+.sem-dados { text-align: center; padding: 2.5rem 1rem; color: var(--texto-suave); }
+
+/* =========================================================
+   RESPONSIVIDADE
+   ========================================================= */
+@media (max-width: 768px) {
+  .hero-titulo { font-size: 1.4rem; }
+  .hero-metricas { gap: .6rem; }
+  .metrica-card { min-width: 85px; padding: .75rem; }
+  .metrica-numero { font-size: 1.4rem; }
+  .nav-link, .nav-link-login { padding: .4rem .6rem; font-size: .8rem; }
+  .logo-sub { display: none; }
+  .form-grade { grid-template-columns: 1fr; }
+  .rodape-conteudo { flex-direction: column; text-align: center; }
+  .pagina-cabecalho { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+  .hero-conteudo { flex-direction: column; }
+  .grade-modulos { grid-template-columns: 1fr; }
+  .nav-lista { gap: 0; }
+}
+
+/* =========================================================
+   ACESSIBILIDADE WCAG AA
+   ========================================================= */
+:focus-visible {
+  outline: 3px solid #f9c74f;
+  outline-offset: 2px;
+}
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
