@@ -1,0 +1,245 @@
+:root {
+  --vinho: #5b1f33;
+  --vinho-escuro: #4a1829;
+  --fundo: #faf8f4;
+  --branco: #ffffff;
+  --borda: #ebe6df;
+  --texto: #2a2226;
+  --texto-suave: #6f6569;
+  --erro: #b3261e;
+  --sucesso: #2e6b3a;
+  --raio: 12px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 14px;
+  color: var(--texto);
+  background: var(--fundo);
+}
+
+.pagina {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 56px;
+}
+
+.cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.cabecalho h1 {
+  font-family: "Poppins", system-ui, sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+}
+.cabecalho p {
+  color: var(--texto-suave);
+  margin-top: 4px;
+}
+
+.voltar {
+  color: var(--vinho);
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+  border: 1px solid var(--vinho);
+  border-radius: 8px;
+  padding: 9px 14px;
+  white-space: nowrap;
+}
+.voltar:hover {
+  background: #fbf4f6;
+}
+
+.conteudo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.painel {
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: 22px;
+}
+
+.painel h2 {
+  font-family: "Poppins", system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--vinho);
+  margin-bottom: 18px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+.linha {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+label {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+input,
+select {
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  background: var(--branco);
+  color: var(--texto);
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--vinho);
+  outline-offset: 2px;
+}
+
+.campo.invalido input,
+.campo.invalido select {
+  border-color: var(--erro);
+}
+.erro {
+  color: var(--erro);
+  font-size: 11px;
+  min-height: 14px;
+  margin-top: 4px;
+}
+
+.mensagem {
+  font-size: 13px;
+  min-height: 18px;
+  margin-bottom: 8px;
+}
+.mensagem.ok {
+  color: var(--sucesso);
+}
+.mensagem.falha {
+  color: var(--erro);
+}
+
+.acoes {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 11px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btn-primario {
+  background: var(--vinho);
+  color: #fff;
+  border: 1px solid var(--vinho);
+}
+.btn-primario:hover {
+  background: var(--vinho-escuro);
+}
+.btn-primario:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.btn-secundario {
+  background: var(--branco);
+  color: var(--vinho);
+  border: 1px solid var(--vinho);
+}
+.btn-secundario:hover {
+  background: #fbf4f6;
+}
+
+.tabela-wrap {
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+th {
+  text-align: left;
+  font-size: 11px;
+  color: var(--texto-suave);
+  font-weight: 600;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--borda);
+}
+td {
+  padding: 12px 6px;
+  border-bottom: 1px solid var(--borda);
+  vertical-align: middle;
+}
+tr:last-child td {
+  border-bottom: none;
+}
+td .email {
+  display: block;
+  color: var(--texto-suave);
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.acao-link {
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vinho);
+  cursor: pointer;
+  padding: 4px 6px;
+}
+.acao-link.perigo {
+  color: var(--erro);
+}
+.acao-link:hover {
+  text-decoration: underline;
+}
+
+.vazio {
+  color: var(--texto-suave);
+  padding: 12px 0;
+}
+
+@media (max-width: 900px) {
+  .conteudo {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 520px) {
+  .linha {
+    grid-template-columns: 1fr;
+  }
+  .cabecalho {
+    flex-direction: column;
+  }
+}
