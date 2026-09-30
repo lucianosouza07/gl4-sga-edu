@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
-import HeroDashboard from "../components/HeroDashboard";
-import CardModulo from "../components/CardModulo";
+import HeroDashboard from "./HeroDashboard";
+import CardModulo from "./CardModulo";
 import type { ResumoMetricas } from "../types/professor";
 import { listarProfessores } from "../services/api";
 
@@ -11,6 +11,7 @@ interface Props {
 
 /**
  * Tela Inicial — GL4-30
+ * Localização: src/frontend/tela_inicial/TelaInicial.tsx
  * Exibe hero dashboard, card de Professores e cards dos módulos futuros.
  */
 const TelaInicial: React.FC<Props> = ({ onNavegar, isOnline }) => {

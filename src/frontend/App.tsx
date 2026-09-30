@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "./components/Navbar";
-import Rodape from "./components/Rodape";
-import TelaInicial from "./pages/TelaInicial";
-import CadastrarProfessor from "./pages/CadastrarProfessor";
-import Login from "./pages/Login";
+import Navbar from "./Navbar";
+import Rodape from "./Rodape";
+import TelaInicial from "./tela_inicial/TelaInicial";
+import CadastrarProfessor from "./cadastrar_professor/CadastrarProfessor";
+import Login from "./Login";
 import { checarStatusBackend } from "./services/api";
 
 type Pagina = "home" | "professores" | "login";
 
 /**
  * App — Roteamento SPA por estado (sem react-router)
- * GL4-30: Tela Inicial
- * GL4-34: Cadastro de Professores
+ * GL4-30: Tela Inicial  → src/frontend/tela_inicial/
+ * GL4-34: Cadastro de Professores → src/frontend/cadastrar_professor/
  */
 const App: React.FC = () => {
   const [pagina, setPagina] = useState<Pagina>("home");
