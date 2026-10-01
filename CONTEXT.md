@@ -17,7 +17,7 @@ Papel funcional atribuído a um Usuário que define suas permissões de acesso (
 _Avoid_: Cargo, role, nível de acesso
 
 **Matrícula**:
-Código numérico único atribuído pela Secretaria que identifica formalmente o Aluno perante a instituição.
+Código numérico único e imutável gerado automaticamente no cadastro do Aluno. Usa o ano e o semestre do cadastro, seguidos de uma sequência que reinicia a cada semestre e cresce sem limite fixo (ex: `202620001`).
 _Avoid_: Código acadêmico, RA, registro escolar
 
 **Administrador**:
@@ -31,4 +31,3 @@ _Avoid_: Atendimento, recepção, operador
 **Professor**:
 Pessoa física do corpo docente responsável por ministrar disciplinas e turmas e lançar avaliações, vinculada a um Usuário.
 _Avoid_: Docente, educador, instrutor
-

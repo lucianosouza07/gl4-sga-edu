@@ -74,7 +74,7 @@ export function LoginForm({
           <Input
             id="identificador"
             type="text"
-            placeholder="admin@gl4.edu ou 20261001"
+            placeholder="admin@gl4.edu ou 202620001"
             value={identificador}
             onChange={(e) => setIdentificador(e.target.value)}
             required

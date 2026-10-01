@@ -24,7 +24,7 @@ class Aluno(Base):
         nullable=False,
         index=True
     )
-    matricula = Column(String(20), unique=True, nullable=False, index=True)
+    matricula = Column(String, unique=True, nullable=False, index=True)
     nome_completo = Column(String(255), nullable=False, index=True)
     cpf = Column(String(14), unique=True, nullable=False, index=True)
     email = Column(String(255), nullable=False)

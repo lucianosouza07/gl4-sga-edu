@@ -30,14 +30,14 @@ Para fixar bem os conceitos:
 > *"Como funcionário da secretaria acadêmica, quero cadastrar alunos no sistema com seus dados de identificação e matrícula, para que constem na base discente e tenham acesso ao portal."*
 
 ### Dessecando os Critérios de Aceite:
-1. **Formulário com Campos Obrigatórios Sinalizados:** A tela deve ter campos claros (Nome, CPF, E-mail, Data de Nascimento, Matrícula) e indicar visualmente o que é obrigatório (ex: com um asterisco vermelho `*`).
+1. **Formulário com Campos Obrigatórios Sinalizados:** A tela deve ter campos claros (Nome, CPF, E-mail e Data de Nascimento) e indicar visualmente o que é obrigatório (ex: com um asterisco vermelho `*`). A matrícula é gerada automaticamente no cadastro e não é editável.
 2. **CRUD Completo:**
    - **C**reate (Criar/Cadastrar novo aluno).
    - **R**ead (Listar e buscar alunos por nome ou matrícula).
    - **U**pdate (Editar dados cadastrais de um aluno existente).
    - **D**elete (Neste caso, **Inativação / Soft Delete** — não apagamos o histórico acadêmico do aluno, apenas mudamos seu status para `inativo`).
 3. **Criação Automática de Usuário com Perfil RBAC "Aluno":** Ao cadastrar um aluno na secretaria, o sistema deve criar automaticamente as credenciais de login para ele acessar o portal no futuro, atribuindo o papel (Role) de `ALUNO`.
-4. **Validação de Matrícula Única:** Duas pessoas não podem ter o mesmo número de matrícula. O sistema deve barrar duplicações tanto no backend quanto no banco de dados.
+4. **Geração de Matrícula Única:** O backend gera uma matrícula imutável no cadastro, no formato `AAAASNNNN` (ano, semestre e sequência). O semestre segue o calendário civil (`1`: janeiro a junho; `2`: julho a dezembro), e a sequência reinicia a cada semestre, tem no mínimo quatro dígitos e pode crescer sem limite fixo. O banco garante a unicidade.
 5. **Testes de Unidade e Integração:** Garantir que o código funcione hoje e continue funcionando mesmo após futuras alterações.
 
 ---
@@ -114,7 +114,7 @@ erDiagram
     ALUNO {
         uuid id PK
         uuid usuario_id FK "Chave estrangeira para Usuario"
-        string matricula UK "Código único (ex: 20261001)"
+        string matricula UK "Gerada: ano + semestre + sequência (ex: 202620001)"
         string nome_completo
         string cpf UK "Documento único"
         string telefone
@@ -123,7 +123,17 @@ erDiagram
         datetime criado_em
         datetime atualizado_em
     }
+
+    SEQUENCIA_MATRICULA {
+        integer ano PK
+        integer semestre PK
+        bigint ultimo_numero
+    }
 ```
+
+O banco mantém um contador por combinação de ano e semestre. A reserva usa um `UPSERT` atômico dentro da transação de criação do Aluno e do Usuário. O contador permanece após a remoção de um Aluno, portanto matrículas emitidas nunca são reutilizadas.
+
+O ano e o semestre são calculados no fuso `America/Bahia`. Matrículas anteriores são preservadas; ao iniciar um contador, o serviço continua após o maior sufixo numérico já cadastrado naquele período. No SQLite, a nova tabela é criada pelo `init_db()`. Para PostgreSQL já existente, aplique `backend/migrations/001_matricula_automatica_postgresql.sql` antes de iniciar a versão atualizada, removendo o limite antigo de comprimento da coluna.
 
 ---
 
@@ -142,21 +152,23 @@ sequenceDiagram
 
     Sec->>Front: Preenche o formulário e clica em Salvar
     Front->>Front: Valida campos obrigatórios localmente
-    Front->>API: POST /api/v1/alunos {nome, cpf, matricula, email, ...}
+    Front->>API: POST /api/v1/alunos {nome, cpf, email, ...}
     API->>API: Pydantic valida formato dos dados (Schema)
     API->>Svc: criar_aluno(dados)
     
-    Svc->>DB: Verifica se matrícula ou CPF já existem
-    alt Matrícula ou CPF já cadastrado
+    Svc->>DB: Verifica se CPF ou e-mail já existem
+    alt CPF ou e-mail já cadastrado
         DB-->>Svc: Registro encontrado
-        Svc-->>API: Erro 409 Conflict (Matrícula duplicada)
+        Svc-->>API: Erro 409 Conflict
         API-->>Front: Resposta de Erro
-        Front-->>Sec: Exibe alerta: "Matrícula já existente!"
+        Front-->>Sec: Exibe alerta com o conflito
     else Dados válidos e únicos
         Note over Svc,DB: INÍCIO DA TRANSAÇÃO ATÔMICA
         Svc->>Svc: Gera senha temporária e calcula Hash (bcrypt)
         Svc->>DB: 1. Insere registro na tabela 'usuarios' (Role: ALUNO)
-        Svc->>DB: 2. Insere registro na tabela 'alunos' (com usuario_id)
+        Svc->>DB: 2. Reserva atomicamente a sequência do ano e semestre
+        Svc->>Svc: Gera matrícula imutável (ex: 202620001)
+        Svc->>DB: 3. Insere registro na tabela 'alunos' (com usuario_id e matrícula)
         Note over Svc,DB: COMMIT DA TRANSAÇÃO (Sucesso garantido para ambos)
         DB-->>Svc: Dados persistidos
         Svc-->>API: Aluno criado com sucesso
@@ -262,7 +274,7 @@ class Aluno(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     usuario_id = Column(UUID(as_uuid=True), ForeignKey("usuarios.id"), unique=True, nullable=False)
-    matricula = Column(String(20), unique=True, nullable=False, index=True)
+    matricula = Column(String, unique=True, nullable=False, index=True)
     nome_completo = Column(String(200), nullable=False, index=True)
     cpf = Column(String(14), unique=True, nullable=False, index=True)
     telefone = Column(String(20), nullable=True)
@@ -283,14 +295,15 @@ O Pydantic atua como um "filtro de segurança": nenhum dado entra no backend se 
 
 ```python
 # app/schemas/aluno.py
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from datetime import date, datetime
 from uuid import UUID
 from typing import Optional
 
 # Dados recebidos do formulário no momento da criação
 class AlunoCreate(BaseModel):
-    matricula: str = Field(..., min_length=4, max_length=20, description="Matrícula única do aluno")
+    model_config = ConfigDict(extra="forbid")
+
     nome_completo: str = Field(..., min_length=3, max_length=200)
     cpf: str = Field(..., min_length=11, max_length=14, description="CPF do aluno")
     email: EmailStr = Field(..., description="E-mail que será usado para login")
@@ -299,6 +312,8 @@ class AlunoCreate(BaseModel):
 
 # Dados permitidos para atualização (edição)
 class AlunoUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     nome_completo: Optional[str] = Field(None, min_length=3, max_length=200)
     telefone: Optional[str] = None
     data_nascimento: Optional[date] = None
@@ -340,21 +355,14 @@ class AlunoService:
         self.db = db
 
     def criar_aluno(self, dados: AlunoCreate) -> Aluno:
-        # 1. Validar se a matrícula já existe
-        if self.db.query(Aluno).filter(Aluno.matricula == dados.matricula).first():
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f"A matrícula '{dados.matricula}' já está cadastrada no sistema."
-            )
-
-        # 2. Validar se CPF já existe
+        # 1. Validar se CPF já existe
         if self.db.query(Aluno).filter(Aluno.cpf == dados.cpf).first():
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="O CPF informado já está cadastrado."
             )
 
-        # 3. Validar se E-mail de usuário já existe
+        # 2. Validar se E-mail de usuário já existe
         if self.db.query(Usuario).filter(Usuario.email == dados.email).first():
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -373,10 +381,14 @@ class AlunoService:
             self.db.add(novo_usuario)
             self.db.flush() # Gera o id do usuario sem fechar a transação
 
+            ano, semestre = periodo_matricula_atual()
+            numero = self._proximo_numero_matricula(ano, semestre)
+            matricula = f"{ano}{semestre}{numero:04d}"
+
             # 5. Criação do Aluno vinculado ao Usuario
             novo_aluno = Aluno(
                 usuario_id=novo_usuario.id,
-                matricula=dados.matricula,
+                matricula=matricula,
                 nome_completo=dados.nome_completo,
                 cpf=dados.cpf,
                 telefone=dados.telefone,
@@ -525,7 +537,6 @@ export interface Aluno {
 }
 
 export interface NovoAlunoForm {
-  matricula: string;
   nome_completo: string;
   cpf: string;
   email: string;
@@ -586,7 +597,6 @@ interface Props {
 
 export const ModalFormAluno: React.FC<Props> = ({ aberto, aoFechar, aoSalvar }) => {
   const [form, setForm] = useState<NovoAlunoForm>({
-    matricula: '',
     nome_completo: '',
     cpf: '',
     email: '',
@@ -612,7 +622,7 @@ export const ModalFormAluno: React.FC<Props> = ({ aberto, aoFechar, aoSalvar }) 
       await aoSalvar(form);
       aoFechar();
     } catch (err: any) {
-      // Exibe mensagem de erro devolvida pelo backend (ex: Matrícula duplicada)
+      // Exibe mensagem de erro devolvida pelo backend (ex: CPF ou e-mail duplicado)
       setErroApi(err.response?.data?.detail || 'Erro ao cadastrar aluno.');
     } finally {
       setSalvando(false);
@@ -628,17 +638,7 @@ export const ModalFormAluno: React.FC<Props> = ({ aberto, aoFechar, aoSalvar }) 
         {erroApi && <div className="alerta-erro">{erroApi}</div>}
 
         <form onSubmit={handleSubmit}>
-          <div className="campo">
-            <label>Matrícula <span className="obrigatorio">*</span></label>
-            <input
-              type="text"
-              name="matricula"
-              value={form.matricula}
-              onChange={handleChange}
-              placeholder="Ex: 20261001"
-              required
-            />
-          </div>
+          {/* A matrícula é gerada pelo backend após o cadastro. */}
 
           <div className="campo">
             <label>Nome Completo <span className="obrigatorio">*</span></label>
@@ -720,7 +720,7 @@ Testes automatizados evitam regressões (quando consertamos uma coisa e quebramo
 
 ### 6.1. O Que É Teste de Unidade vs. Teste de Integração?
 - **Teste de Unidade:** Testa uma função isolada, sem tocar no banco de dados real. Exemplo: *"A função de criptografar senha está gerando um hash válido?"*
-- **Teste de Integração:** Testa o fluxo completo (Endpoint + Serviço + Banco de Dados de Teste em memória). Exemplo: *"Quando chamo POST /alunos com matrícula duplicada, o sistema retorna erro 409?"*
+- **Teste de Integração:** Testa o fluxo completo (Endpoint + Serviço + Banco de Dados de Teste em memória). Exemplo: *"Quando chamo POST /alunos, o sistema gera uma matrícula sequencial única?"*
 
 ### 6.2. Exemplo de Teste de Integração com Pytest
 
@@ -732,7 +732,6 @@ from fastapi.testclient import TestClient
 def test_deve_cadastrar_aluno_e_criar_usuario_automaticamente(client: TestClient):
     # 1. Dados de entrada
     payload = {
-        "matricula": "20261001",
         "nome_completo": "Gabriele Natividade",
         "cpf": "123.456.789-00",
         "email": "gabriele@universidade.edu.br",
@@ -746,33 +745,24 @@ def test_deve_cadastrar_aluno_e_criar_usuario_automaticamente(client: TestClient
     # 3. Asserções (Verificações)
     assert response.status_code == 201
     dados = response.json()
-    assert dados["matricula"] == "20261001"
+    assert dados["matricula"].isdigit()
+    assert len(dados["matricula"]) >= 9
     assert dados["nome_completo"] == "Gabriele Natividade"
     assert dados["status"] == "ATIVO"
     assert "id" in dados
     assert "usuario_id" in dados
 
-def test_deve_falhar_ao_tentar_cadastrar_matricula_duplicada(client: TestClient):
+def test_matricula_nao_pode_ser_informada_no_cadastro(client: TestClient):
     payload = {
-        "matricula": "20261002",
+        "matricula": "202620001",
         "nome_completo": "Aluno Teste 1",
         "cpf": "111.222.333-44",
         "email": "aluno1@universidade.edu.br",
         "data_nascimento": "2001-01-01"
     }
 
-    # Primeiro cadastro: deve passar
-    res1 = client.post("/api/v1/alunos", json=payload)
-    assert res1.status_code == 201
-
-    # Segundo cadastro com a MESMA matrícula: deve falhar com 409 Conflict
-    payload_duplicado = payload.copy()
-    payload_duplicado["email"] = "outro_email@universidade.edu.br"
-    payload_duplicado["cpf"] = "555.666.777-88"
-
-    res2 = client.post("/api/v1/alunos", json=payload_duplicado)
-    assert res2.status_code == 409
-    assert "já está cadastrada" in res2.json()["detail"]
+    response = client.post("/api/v1/alunos", json=payload)
+    assert response.status_code == 422
 ```
 
 ---
@@ -792,6 +782,7 @@ Para orientar os estudos e a construção conjunta, divida o trabalho nos seguin
 - [x] Criar a configuração do SQLAlchemy (`session.py`).
 - [x] Criar o model `Usuario` com campos de login (`email`, `senha_hash`, `ativo`) e perfil Enum (`PerfilUsuario`: ADMIN, SECRETARIA, PROFESSOR, ALUNO).
 - [x] Criar o model `Aluno` com a chave estrangeira `usuario_id` e restrição `unique=True` em `matricula` e `cpf`.
+- [x] Criar o contador de matrículas por ano e semestre para emissão atômica e sem reutilização.
 - [x] Criar o script/seed automático de inicialização do primeiro usuário Admin padrão (`admin@gl4.edu` / `admin123`).
 
 Para popular o banco local com 30 alunos fictícios ativos e testar a busca/paginação, execute `cd backend && python -m app.seeds.alunos_teste`. O seed é idempotente e preserva os registros de demonstração já existentes.
@@ -801,10 +792,11 @@ Para popular o banco local com 30 alunos fictícios ativos e testar a busca/pagi
 - [x] Criar os Schemas Pydantic de autenticação (`LoginRequest`, `TokenResponse`, `UsuarioResponse`) e de alunos (`AlunoCreate`, `AlunoUpdate`, `AlunoResponse`).
 - [x] Implementar o `AuthService` com suporte a login flexível por e-mail ou matrícula.
 - [x] Escrever o `AlunoService`:
-  - Validação de matrícula existente.
+  - Geração automática e imutável de matrícula única a cada cadastro de Aluno.
   - Criação conjunta de `Usuario` + `Aluno` dentro da mesma transação com senha inicial padrão.
   - Implementação do método `inativar_aluno` (soft delete).
 - [x] Criar os testes unitários e de integração com `pytest` (testes de autenticação, RBAC e alunos) e ver todos passarem no terminal!
+- [x] Gerar matrícula imutável por ano e semestre, com sequência atômica sem limite fixo.
 
 ### 🌐 Etapa 4: Expondo as Rotas da API (Backend)
 - [x] Criar o router de autenticação `/api/v1/auth` (endpoints `/login` e `/me`).
@@ -821,7 +813,7 @@ Para popular o banco local com 30 alunos fictícios ativos e testar a busca/pagi
 - [x] Adicionar a **Barra de Busca** com filtro por nome e matrícula.
 - [x] Criar o **Modal de Cadastro**:
   - Campos com indicação visual de obrigatório (`*`).
-  - Tratamento de erro caso a matrícula já exista (mensagem amigável).
+  - Exibição da matrícula gerada pelo backend após o cadastro.
 - [x] Adicionar botão de **Inativar Aluno** com confirmação prévia para evitar cliques acidentais.
 
 ---

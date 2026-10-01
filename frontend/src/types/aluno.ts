@@ -15,7 +15,6 @@ export interface Aluno {
 }
 
 export interface AlunoCreate {
-  matricula: string;
   nome_completo: string;
   cpf: string;
   email: string;

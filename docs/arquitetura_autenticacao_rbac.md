@@ -101,7 +101,7 @@ Recebe o identificador e a senha para autenticar.
 - **Request Body (`LoginRequest`):**
 ```json
 {
-  "identificador": "admin@gl4.edu", // ou "20261001" (matrícula)
+  "identificador": "admin@gl4.edu", // ou "202620001" (matrícula)
   "senha": "senhaSegura123"
 }
 ```

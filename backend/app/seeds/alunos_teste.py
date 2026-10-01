@@ -25,24 +25,23 @@ NOMES_DEMO = (
 def seed_alunos_teste(db: Session) -> int:
     """Cria alunos fictícios ativos para exercitar paginação e busca.
 
-    Matrículas, CPFs e e-mails usam identificadores de demonstração fixos.
-    Registros com matrícula já existente são preservados e ignorados.
+    CPFs e e-mails usam identificadores de demonstração fixos. A matrícula é
+    gerada pelo serviço e registros com e-mail já existente são preservados.
     Retorna o número de alunos criados nesta execução.
     """
     service = AlunoService(db)
     criados = 0
 
     for indice, nome in enumerate(NOMES_DEMO, start=1):
-        matricula = f"DEMO2026{indice:04d}"
-        if db.query(Aluno).filter(Aluno.matricula == matricula).first():
+        email = f"aluno.demo.{indice:04d}@example.com"
+        if db.query(Aluno).filter(Aluno.email == email).first():
             continue
 
         service.criar_aluno(
             AlunoCreate(
-                matricula=matricula,
                 nome_completo=nome,
                 cpf=f"900.000.000-{indice:02d}",
-                email=f"aluno.demo.{indice:04d}@example.com",
+                email=email,
                 data_nascimento=date(
                     2000 + (indice % 8),
                     (indice % 12) + 1,

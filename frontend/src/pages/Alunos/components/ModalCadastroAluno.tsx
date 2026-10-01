@@ -29,7 +29,6 @@ interface ModalCadastroAlunoProps {
 }
 
 const FORM_VAZIO: AlunoCreate = {
-  matricula: "",
   nome_completo: "",
   cpf: "",
   email: "",
@@ -73,7 +72,6 @@ export const ModalCadastroAluno: React.FC<ModalCadastroAlunoProps> = ({
 
     try {
       const payload: AlunoCreate = {
-        matricula: formData.matricula.trim(),
         nome_completo: formData.nome_completo.trim(),
         cpf: formData.cpf.replace(/\D/g, ""),
         email: formData.email.trim(),
@@ -82,9 +80,9 @@ export const ModalCadastroAluno: React.FC<ModalCadastroAlunoProps> = ({
         senha_inicial: formData.senha_inicial ? formData.senha_inicial : null,
       };
 
-      await alunosService.cadastrar(payload);
+      const aluno = await alunosService.cadastrar(payload);
       toast.success("Aluno cadastrado com sucesso!", {
-        description: `Matrícula ${payload.matricula} vinculada à conta de usuário.`,
+        description: `Matrícula ${aluno.matricula} gerada para o aluno.`,
       });
 
       setFormData(FORM_VAZIO);
@@ -167,28 +165,8 @@ export const ModalCadastroAluno: React.FC<ModalCadastroAlunoProps> = ({
               )}
             </Field>
 
-            {/* Matrícula e CPF */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field>
-                <FieldLabel htmlFor="matricula">
-                  <Typography variant="small">
-                    Matrícula <span className="text-destructive">*</span>
-                  </Typography>
-                </FieldLabel>
-                <Input
-                  id="matricula"
-                  placeholder="Ex: 20261001"
-                  value={formData.matricula}
-                  onChange={(e) => handleChange("matricula", e.target.value)}
-                  required
-                  disabled={salvando}
-                  className={errosPorCampo.matricula ? "border-destructive focus-visible:ring-destructive/30" : ""}
-                />
-                {errosPorCampo.matricula && (
-                  <p className="text-xs text-destructive mt-1">{errosPorCampo.matricula}</p>
-                )}
-              </Field>
-
+            {/* CPF */}
+            <div className="grid grid-cols-1 gap-4">
               <Field>
                 <FieldLabel htmlFor="cpf">
                   <Typography variant="small">

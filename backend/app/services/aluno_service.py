@@ -1,12 +1,23 @@
 import math
 import uuid
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from typing import Optional, Dict, Any
+from sqlalchemy.dialects.postgresql import insert as postgresql_insert
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm import Session
 from app.models.aluno import Aluno, StatusAluno
+from app.models.sequencia_matricula import SequenciaMatricula
 from app.models.usuario import Usuario, PerfilUsuario
 from app.schemas.aluno import AlunoCreate, AlunoUpdate
 from app.core.security import gerar_hash_senha
 from app.core.exceptions import RegistroJaExisteError, EntidadeNaoEncontradaError
+
+
+def periodo_matricula_atual() -> tuple[int, int]:
+    """Obtém o ano e o semestre civil no fuso horário da instituição."""
+    agora = datetime.now(ZoneInfo("America/Bahia"))
+    return agora.year, 1 if agora.month <= 6 else 2
 
 
 class AlunoService:
@@ -18,17 +29,13 @@ class AlunoService:
     def criar_aluno(self, dados: AlunoCreate) -> Aluno:
         """
         Cria atômica e conjuntamente o Usuario (IAM) e o Aluno (domínio pedagógico).
-        Valida previamente unicidade de matrícula, CPF e e-mail.
+        Gera a matrícula e valida previamente a unicidade de CPF e e-mail.
         """
-        # 1. Validar se a matrícula já existe
-        if self.db.query(Aluno).filter(Aluno.matricula == dados.matricula).first():
-            raise RegistroJaExisteError(f"A matrícula '{dados.matricula}' já está cadastrada no sistema.")
-
-        # 2. Validar se CPF já existe
+        # 1. Validar se CPF já existe
         if self.db.query(Aluno).filter(Aluno.cpf == dados.cpf).first():
             raise RegistroJaExisteError("O CPF informado já está cadastrado.")
 
-        # 3. Validar se E-mail de usuário já existe
+        # 2. Validar se E-mail de usuário já existe
         if self.db.query(Usuario).filter(Usuario.email.ilike(dados.email)).first():
             raise RegistroJaExisteError("O e-mail informado já possui uma conta de acesso.")
 
@@ -45,10 +52,14 @@ class AlunoService:
             self.db.add(novo_usuario)
             self.db.flush()  # Gera novo_usuario.id sem comitar a transação
 
+            ano, semestre = periodo_matricula_atual()
+            numero = self._proximo_numero_matricula(ano, semestre)
+            matricula = f"{ano}{semestre}{numero:04d}"
+
             # 5. Criação do Aluno vinculado ao Usuario
             novo_aluno = Aluno(
                 usuario_id=novo_usuario.id,
-                matricula=dados.matricula,
+                matricula=matricula,
                 nome_completo=dados.nome_completo,
                 cpf=dados.cpf,
                 email=dados.email,
@@ -66,6 +77,42 @@ class AlunoService:
         except Exception:
             self.db.rollback()
             raise
+
+    def _proximo_numero_matricula(self, ano: int, semestre: int) -> int:
+        """Reserva atomicamente o próximo número, preservando matrículas anteriores."""
+        dialect = self.db.get_bind().dialect.name
+        if dialect == "sqlite":
+            insert = sqlite_insert
+        elif dialect == "postgresql":
+            insert = postgresql_insert
+        else:
+            raise RuntimeError(f"Geração de matrícula não suportada para o banco '{dialect}'.")
+
+        numero_inicial = 1
+        if self.db.get(SequenciaMatricula, (ano, semestre)) is None:
+            prefixo = f"{ano}{semestre}"
+            matriculas = self.db.query(Aluno.matricula).filter(
+                Aluno.matricula.startswith(prefixo)
+            ).all()
+            numeros = [
+                int(matricula[len(prefixo):])
+                for (matricula,) in matriculas
+                if matricula[len(prefixo):].isascii() and matricula[len(prefixo):].isdigit()
+            ]
+            numero_inicial = max(numeros, default=0) + 1
+
+        comando = insert(SequenciaMatricula).values(
+            ano=ano,
+            semestre=semestre,
+            ultimo_numero=numero_inicial,
+        )
+        comando = comando.on_conflict_do_update(
+            index_elements=[SequenciaMatricula.ano, SequenciaMatricula.semestre],
+            set_={
+                "ultimo_numero": SequenciaMatricula.ultimo_numero + 1,
+            },
+        ).returning(SequenciaMatricula.ultimo_numero)
+        return self.db.execute(comando).scalar_one()
 
     def listar_alunos(
         self,
