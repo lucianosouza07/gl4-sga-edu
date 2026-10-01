@@ -181,7 +181,7 @@ Recomendamos **FastAPI** por ser extremamente rápido, moderno, autodocumentado 
 backend/
 ├── app/
 │   ├── main.py                  # Ponto de entrada da aplicação FastAPI
-│   ├── core/                    # Configurações globais, segurança, hash de senha
+│   ├── core/                    # Configurações globais, segurança, hash e JWT
 │   │   ├── config.py
 │   │   └── security.py
 │   ├── database/                # Conexão e sessão com o banco
@@ -190,17 +190,25 @@ backend/
 │   │   ├── usuario.py
 │   │   └── aluno.py
 │   ├── schemas/                 # Validações de entrada/saída (Pydantic)
-│   │   ├── usuario.py
+│   │   ├── auth.py
 │   │   └── aluno.py
 │   ├── services/                # Regras de negócio e transações
+│   │   ├── auth_service.py
 │   │   └── aluno_service.py
-│   └── api/                     # Rotas HTTP (Endpoints)
+│   ├── seeds/                   # Inicializadores e dados padrão
+│   │   └── admin_seed.py
+│   └── api/                     # Rotas HTTP (Endpoints) e RBAC
+│       ├── deps.py              # Dependências get_current_user e require_roles
 │       └── v1/
 │           ├── router.py
 │           └── endpoints/
+│               ├── auth.py
 │               └── alunos.py
 ├── tests/                       # Testes automatizados (Pytest)
 │   ├── conftest.py
+│   ├── test_models.py
+│   ├── test_seeds.py
+│   ├── test_auth_api.py
 │   ├── test_alunos_service.py
 │   └── test_alunos_api.py
 ├── requirements.txt             # Dependências do projeto

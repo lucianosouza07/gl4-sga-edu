@@ -110,6 +110,7 @@ sqlalchemy>=2.0.28
 pydantic[email]>=2.6.0
 passlib[bcrypt]>=1.7.4
 bcrypt<4.1.0
+pyjwt>=2.8.0
 pytest>=8.1.0
 httpx>=0.27.0
 ```
@@ -121,7 +122,7 @@ pip install -r requirements.txt
 
 #### Opção B: Direto via Linha de Comando:
 ```bash
-pip install fastapi uvicorn sqlalchemy "pydantic[email]" "passlib[bcrypt]" pytest httpx
+pip install fastapi uvicorn sqlalchemy "pydantic[email]" "passlib[bcrypt]" "pyjwt>=2.8.0" pytest httpx
 ```
 
 > ⚠️ **Atenção:** Em terminais Linux e macOS (Zsh/Bash), sempre utilize aspas duplas em `"pydantic[email]"` e `"passlib[bcrypt]"` para evitar que o shell confunda os colchetes com padrões glob de busca de arquivos.
@@ -133,7 +134,7 @@ pip install fastapi uvicorn sqlalchemy "pydantic[email]" "passlib[bcrypt]" pytes
 Verifique se todas as bibliotecas foram instaladas e podem ser importadas sem erro:
 
 ```bash
-python -c "import fastapi, sqlalchemy, pydantic, passlib, pytest, httpx; print('✅ Ambiente virtual e dependências configurados com sucesso!')"
+python -c "import fastapi, sqlalchemy, pydantic, passlib, jwt, pytest, httpx; print('✅ Ambiente virtual e dependências configurados com sucesso!')"
 ```
 
 ---

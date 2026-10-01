@@ -9,6 +9,7 @@ import {
   UserPlus,
   ShieldCheck,
   BookOpen,
+  Type,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Typography } from "@/components/ui/typography";
 import {
   Dialog,
   DialogTrigger,
@@ -61,12 +63,12 @@ function App() {
               <GraduationCap className="size-6" />
             </div>
             <div>
-              <h1 className="text-base font-semibold leading-tight tracking-tight">
+              <Typography variant="large" className="text-base font-semibold leading-tight tracking-tight">
                 GL4 SGA-EDU
-              </h1>
-              <p className="text-xs text-muted-foreground">
+              </Typography>
+              <Typography variant="muted" className="text-xs">
                 Sistema de Gestão Acadêmica
-              </p>
+              </Typography>
             </div>
           </div>
 
@@ -103,18 +105,18 @@ function App() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Badge variant="default" className="gap-1">
-                <CheckCircle2 className="size-3.5" /> Etapa 1 Concluída
+                <CheckCircle2 className="size-3.5" /> Etapa 1 & 2 Concluídas
               </Badge>
               <span className="text-xs text-muted-foreground font-mono">
-                Tailwind v4 + shadcn/ui
+                Tailwind v4 + shadcn + Typography
               </span>
             </div>
-            <h2 className="text-2xl font-bold tracking-tight">
+            <Typography variant="h2" className="text-2xl font-bold tracking-tight border-b-0 pb-0">
               Ambiente de Desenvolvimento Operacional!
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Os componentes do shadcn e as variáveis oklch do tema Meridian estão carregados e prontos para a construção do módulo de Alunos.
-            </p>
+            </Typography>
+            <Typography variant="muted" className="text-sm">
+              Componentes shadcn, tipografia padrão e variáveis oklch do tema Meridian prontos para o módulo de Alunos.
+            </Typography>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -161,8 +163,33 @@ function App() {
         </section>
 
         {/* Grade de Cards com Componentes */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1: Botões e Variantes */}
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Card 1: Tipografia Padronizada */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Type className="size-4 text-primary" /> Tipografia Padrão
+              </CardTitle>
+              <CardDescription>
+                Evita HTML cru e CSS solto via &lt;Typography&gt;.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Typography variant="h4">Título H4 Padrão</Typography>
+              <Typography variant="lead" className="text-sm">Texto lead introdutório.</Typography>
+              <Typography variant="muted" className="text-xs">
+                Texto muted com <Typography variant="inlineCode">código</Typography> embutido.
+              </Typography>
+              <Typography variant="destructive" className="text-xs">
+                Mensagem de erro padronizada.
+              </Typography>
+            </CardContent>
+            <CardFooter className="text-xs text-muted-foreground border-t border-border/50 pt-3">
+              Design System consistente.
+            </CardFooter>
+          </Card>
+
+          {/* Card 2: Botões e Variantes */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -186,16 +213,16 @@ function App() {
                   className="w-full"
                   onClick={() => setTestCount(testCount + 1)}
                 >
-                  Contador Interativo: {testCount} cliques
+                  Contador: {testCount} cliques
                 </Button>
               </div>
             </CardContent>
             <CardFooter className="text-xs text-muted-foreground border-t border-border/50 pt-3">
-              Totalmente reativo e integrado ao tema.
+              Totalmente reativo e integrado.
             </CardFooter>
           </Card>
 
-          {/* Card 2: Formulários e Inputs */}
+          {/* Card 3: Formulários e Inputs */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -217,16 +244,16 @@ function App() {
                   />
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">
+              <Typography variant="muted" className="text-xs">
                 Digitado: <span className="font-mono text-foreground">{searchTerm || "(vazio)"}</span>
-              </p>
+              </Typography>
             </CardContent>
             <CardFooter className="text-xs text-muted-foreground border-t border-border/50 pt-3">
               Pronto para os filtros de listagem.
             </CardFooter>
           </Card>
 
-          {/* Card 3: Badges e Status */}
+          {/* Card 4: Badges e Status */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -243,12 +270,12 @@ function App() {
                 <Badge variant="outline">Trancado</Badge>
                 <Badge variant="destructive">Inativo</Badge>
               </div>
-              <div className="text-xs text-muted-foreground pt-1">
+              <Typography variant="muted" className="text-xs pt-1">
                 Suporta diferentes estilos e estados de acordo com a regra de negócio do SGA.
-              </div>
+              </Typography>
             </CardContent>
             <CardFooter className="text-xs text-muted-foreground border-t border-border/50 pt-3">
-              Paleta oklch balanceada para alta legibilidade.
+              Paleta oklch balanceada.
             </CardFooter>
           </Card>
         </section>
