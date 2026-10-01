@@ -79,12 +79,13 @@ class PerfilUsuario(str, Enum):
 class Usuario(Base):
     __tablename__ = "usuarios"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4)
+    nome = Column(String(255), nullable=False)  # Ex: "Administrador do Sistema", "Maria (Secretaria)"
     email = Column(String(255), unique=True, nullable=False, index=True)
     senha_hash = Column(String(255), nullable=False)
     perfil = Column(String(50), nullable=False, default=PerfilUsuario.ALUNO.value)
     ativo = Column(Boolean, default=True, nullable=False)
-    criado_em = Column(DateTime, default=datetime.utcnow)
+    criado_em = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     # Relacionamento 1:1 com Aluno (caso o usuário seja um aluno)
     aluno = relationship("Aluno", back_populates="usuario", uselist=False)

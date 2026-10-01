@@ -231,12 +231,13 @@ class PerfilUsuario(str, Enum):
 class Usuario(Base):
     __tablename__ = "usuarios"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4)
+    nome = Column(String(255), nullable=False)  # Ex: "Administrador do Sistema", "Maria (Secretaria)"
     email = Column(String(255), unique=True, nullable=False, index=True)
     senha_hash = Column(String(255), nullable=False)
     perfil = Column(String(50), nullable=False, default=PerfilUsuario.ALUNO.value)
     ativo = Column(Boolean, default=True, nullable=False)
-    criado_em = Column(DateTime, default=datetime.utcnow)
+    criado_em = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 ```
 
 ```python
@@ -780,13 +781,13 @@ Para orientar os estudos e a construção conjunta, divida o trabalho nos seguin
 - [x] Instalar `axios` e `lucide-react` (ícones) no frontend.
 
 ### 🗄️ Etapa 2: Modelagem e Banco de Dados (Backend)
-- [ ] Criar a configuração do SQLAlchemy (`session.py`).
-- [ ] Criar o model `Usuario` com campos de login (`email`, `senha_hash`, `ativo`) e perfil Enum (`PerfilUsuario`: ADMIN, SECRETARIA, PROFESSOR, ALUNO).
-- [ ] Criar o model `Aluno` com a chave estrangeira `usuario_id` e restrição `unique=True` em `matricula` e `cpf`.
-- [ ] Criar o script/seed automático de inicialização do primeiro usuário Admin padrão (`admin@gl4.edu` / `admin123`).
+- [x] Criar a configuração do SQLAlchemy (`session.py`).
+- [x] Criar o model `Usuario` com campos de login (`email`, `senha_hash`, `ativo`) e perfil Enum (`PerfilUsuario`: ADMIN, SECRETARIA, PROFESSOR, ALUNO).
+- [x] Criar o model `Aluno` com a chave estrangeira `usuario_id` e restrição `unique=True` em `matricula` e `cpf`.
+- [x] Criar o script/seed automático de inicialização do primeiro usuário Admin padrão (`admin@gl4.edu` / `admin123`).
 
 ### 🧠 Etapa 3: Regras de Negócio e Testes (Backend)
-- [ ] Criar os utilitários de segurança (`security.py`): hash de senha com bcrypt e geração/validação de JWT com PyJWT.
+- [x] Criar os utilitários de segurança (`security.py`): hash de senha com bcrypt e geração/validação de JWT com PyJWT.
 - [ ] Criar os Schemas Pydantic de autenticação (`LoginRequest`, `TokenResponse`, `UsuarioResponse`) e de alunos (`AlunoCreate`, `AlunoUpdate`, `AlunoResponse`).
 - [ ] Implementar o `AuthService` com suporte a login flexível por e-mail ou matrícula.
 - [ ] Escrever o `AlunoService`:
@@ -824,5 +825,28 @@ Para orientar os estudos e a construção conjunta, divida o trabalho nos seguin
 | **Soft Delete** | Marcar um registro como `inativo` em vez de deletar fisicamente da tabela, preservando histórico. |
 | **DTO / Schema** | Objeto que define exatamente quais campos podem entrar e sair da API, blindando o banco. |
 | **Hash de Senha** | Transformar a senha em um código irreversível (bcrypt) para nunca guardar senhas em texto puro. |
-| **Transação DB** | Pacote de operações que só se concretiza se todas derem certo. Se uma der erro, desfaz tudo (Rollback). |
 | **Status HTTP** | Códigos de resposta da internet: `200` (OK), `201` (Criado), `400` (Dado inválido), `404` (Não encontrado), `409` (Conflito/Duplicado), `500` (Erro no servidor). |
+
+---
+
+## 9. Diretriz de Escalabilidade do Domínio (Novos Papéis e Professor)
+
+Para assegurar que o sistema cresça sem gerar retrabalho ou quebras na base de código, adota-se o padrão **IAM vs. Domain Roles**:
+
+1. **`Usuario` (Identidade e Acesso):** Representa unicamente a conta digital de acesso ao sistema (login, senha, perfil de autorização e nome para exibição). Ele é agnóstico à função acadêmica.
+2. **Entidades Especializadas (Papéis de Negócio):** 
+   - Hoje: O papel estudantil é representado pela entidade `Aluno` (1:1 opcional vinculada ao `Usuario`).
+   - Futuro (Módulo de Docentes): A adição do papel de **Professor** seguirá rigorosamente o mesmo padrão plug-and-play:
+     - Criação da tabela `professores` com chave estrangeira `usuario_id` (1:1 com `Usuario`), contendo campos específicos como `registro_docente`, `titulacao` e `departamento`.
+     - Zero impacto ou alteração na tabela `alunos` ou nos serviços de alunos existentes.
+     - Extensão direta do RBAC: endpoints de turmas, notas e diários de classe usam a dependência `require_roles([PerfilUsuario.PROFESSOR])`.
+
+```mermaid
+classDiagram
+    Usuario "1" --> "0..1" Aluno : papel estudantil (implementado)
+    Usuario "1" --> "0..1" Professor : papel docente (extensão futura)
+    Professor "1" --> "*" Turma : ministra
+    Aluno "1" --> "*" Nota : recebe
+    Turma "1" --> "*" Nota : compõe
+```
+
