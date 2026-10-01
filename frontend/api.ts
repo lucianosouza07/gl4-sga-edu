@@ -1,7 +1,7 @@
 /**
  * SGA-Edu — Serviço de Integração com o Backend FastAPI (GL4-34 + GL4-30)
  */
-import type { Professor, ProfessorEntrada } from "../types/professor";
+import type { Professor, ProfessorEntrada } from "./professor";
 
 // Base URL apontando para o FastAPI na porta 8000
 const API_BASE = "http://127.0.0.1:8000/api";

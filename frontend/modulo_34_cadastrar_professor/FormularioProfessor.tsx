@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import type { Professor, ProfessorEntrada } from "../types/professor";
+import type { Professor, ProfessorEntrada } from "../professor";
 
 interface Props {
   professor?: Professor | null;

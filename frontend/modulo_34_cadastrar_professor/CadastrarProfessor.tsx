@@ -1,19 +1,19 @@
 import React, { useEffect, useState, useCallback } from "react";
 import TabelaProfessores from "./TabelaProfessores";
 import FormularioProfessor from "./FormularioProfessor";
-import type { Professor, ProfessorEntrada } from "../types/professor";
+import type { Professor, ProfessorEntrada } from "../professor";
 import {
   listarProfessores,
   cadastrarProfessor,
   atualizarProfessor,
   excluirProfessor,
-} from "../services/api";
+} from "../api";
 
 type ModoFormulario = "criar" | "editar" | null;
 
 /**
  * Página de Cadastro e Gestão de Professores — GL4-34
- * Localização: src/frontend/cadastrar_professor/CadastrarProfessor.tsx
+ * Localização: frontend/modulo_34_cadastrar_professor/CadastrarProfessor.tsx
  */
 const CadastrarProfessor: React.FC = () => {
   const [professores, setProfessores] = useState<Professor[]>([]);

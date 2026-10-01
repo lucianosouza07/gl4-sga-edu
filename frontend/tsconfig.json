@@ -22,11 +22,11 @@
     "Navbar.tsx",
     "Rodape.tsx",
     "Login.tsx",
+    "api.ts",
+    "professor.ts",
     "index.css",
-    "tela_inicial",
-    "cadastrar_professor",
-    "types",
-    "services"
+    "modulo_30_tela_inicial",
+    "modulo_34_cadastrar_professor"
   ],
   "exclude": ["node_modules", "dist", "vite.config.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]

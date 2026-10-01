@@ -1,5 +1,5 @@
 import React from "react";
-import type { Professor } from "../types/professor";
+import type { Professor } from "../professor";
 
 interface Props {
   professores: Professor[];
