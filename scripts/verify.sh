@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# verify.sh — Validador Completo de Qualidade e Build do GL4 SGA-EDU
+# verify.sh — Validador Mestre de Qualidade, Testes e Build do GL4 SGA-EDU
 #
 # Estrutura:
-#  1. Backend: Executa Pytest no ambiente virtual (.venv)
-#  2. Frontend: Validação de Shadcn UI + Typecheck (tsc) + Build (Vite)
+#  1. Backend: Executa Pytest com medição de cobertura de código (pytest-cov)
+#  2. Frontend: Auditoria Shadcn UI + Typecheck estrito (tsc) + Build (Vite)
 #
 # Uso:
 #   ./scripts/verify.sh            # Validação completa (Backend + Frontend)
-#   ./scripts/verify.sh --backend  # Apenas backend Python
+#   ./scripts/verify.sh --backend  # Apenas backend Python + Cobertura
 #   ./scripts/verify.sh --frontend # Apenas frontend React
 #   ./scripts/verify.sh --quick    # Verificação rápida (sem rebuild completo do front)
 # ==============================================================================
@@ -18,6 +18,7 @@ set -eo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
+# Cores e estilização para feedback visual
 BOLD="\033[1m"
 GREEN="\033[0;32m"
 BLUE="\033[0;34m"
@@ -49,15 +50,17 @@ for arg in "$@"; do
   esac
 done
 
+START_TIME=$(date +%s)
+
 echo -e "\n${BOLD}${BLUE}======================================================${RESET}"
-echo -e "${BOLD}${BLUE}   GL4 SGA-EDU — Verificação de Qualidade e Testes    ${RESET}"
+echo -e "${BOLD}${BLUE}   GL4 SGA-EDU — Validador Mestre de Qualidade        ${RESET}"
 echo -e "${BOLD}${BLUE}======================================================${RESET}\n"
 
 # ------------------------------------------------------------------------------
-# 1. BACKEND
+# 1. BACKEND PYTHON (FastAPI, Pytest & Test Coverage)
 # ------------------------------------------------------------------------------
 if [ "$run_backend" = true ]; then
-  echo -e "${BOLD}[1/2] 🐍 Verificando Backend (Python / FastAPI)...${RESET}"
+  echo -e "${BOLD}${YELLOW}==> [1/2] 🐍 Backend (Python / FastAPI / Cobertura de Testes)${RESET}"
   
   if [ ! -d "backend/.venv" ]; then
     echo -e "${RED}Erro: Ambiente virtual 'backend/.venv' não encontrado.${RESET}"
@@ -66,24 +69,24 @@ if [ "$run_backend" = true ]; then
   fi
 
   cd backend
-  echo -e "  ↳ Executando testes unitários e de integração com pytest..."
-  ./.venv/bin/pytest -v
+  echo -e "  ↳ Executando suíte de testes com medição de cobertura (pytest-cov)..."
+  ./.venv/bin/pytest
   cd "$REPO_ROOT"
-  echo -e "${GREEN}  ✓ Backend validado com sucesso!${RESET}\n"
+  echo -e "${GREEN}  ✓ Backend e Cobertura validados com sucesso!${RESET}\n"
 fi
 
 # ------------------------------------------------------------------------------
-# 2. FRONTEND
+# 2. FRONTEND WEB (React, Vite, TypeScript & shadcn/ui)
 # ------------------------------------------------------------------------------
 if [ "$run_frontend" = true ]; then
-  echo -e "${BOLD}[2/2] ⚛️  Verificando Frontend (React / Vite / shadcn)...${RESET}"
+  echo -e "${BOLD}${YELLOW}==> [2/2] ⚛️  Frontend (React / Vite / Tailwind v4 / shadcn)${RESET}"
 
   if [ ! -d "frontend/node_modules" ]; then
     echo -e "${RED}Erro: 'frontend/node_modules' não encontrado. Execute 'npm install' em frontend.${RESET}"
     exit 1
   fi
 
-  echo -e "  ↳ Auditando uso de componentes shadcn/ui..."
+  echo -e "  ↳ Auditando conformidade de componentes Shadcn UI..."
   python3 scripts/check_shadcn_usage.py
 
   cd frontend
@@ -98,6 +101,9 @@ if [ "$run_frontend" = true ]; then
   echo -e "${GREEN}  ✓ Frontend validado com sucesso!${RESET}\n"
 fi
 
+END_TIME=$(date +%s)
+ELAPSED=$((END_TIME - START_TIME))
+
 echo -e "${BOLD}${GREEN}======================================================${RESET}"
-echo -e "${BOLD}${GREEN}   ✅ TODAS AS VERIFICAÇÕES PASSARAM COM SUCESSO!     ${RESET}"
+echo -e "${BOLD}${GREEN}   ✅ TODAS AS VERIFICAÇÕES PASSARAM! (${ELAPSED}s)      ${RESET}"
 echo -e "${BOLD}${GREEN}======================================================${RESET}\n"

@@ -52,10 +52,13 @@ Este arquivo é a **fonte única de regras e governança do repositório para ag
 
 1. **Leitura Prévia:** Antes de propor alterações em regras ou telas, leia os documentos correspondentes em `docs/` e o `CONTEXT.md`.
 2. **Mudanças Mínimas e Cirúrgicas:** Faça a menor alteração suficiente que satisfaça a tarefa solicitada. Não refatore código alheio sem pedido explícito.
-3. **Validação Automatizada Mandatória:** Antes de considerar uma tarefa concluída, execute o validador do repositório:
-   ```bash
-   ./scripts/verify.sh
-   ```
+3. **Validação e Auto-Correção Mandatórias (Script Mestre `verify.sh`):**
+   - O script principal e oficial do repositório é `./scripts/verify.sh`.
+   - **Toda vez**, antes de concluir qualquer tarefa ou finalizar a execução, o agente DEVE obrigatoriamente executar:
+     ```bash
+     ./scripts/verify.sh
+     ```
+   - **Ciclo de Auto-Correção:** Caso qualquer teste unitário, integração, cobertura, linter de componentes ou build falhe, o agente é **obrigado a analisar a saída do erro, aplicar a correção no código e executar novamente `./scripts/verify.sh`** até obter 100% de aprovação antes de finalizar o turno ou solicitar feedback.
 4. **Atualização da Documentação:** Ao concluir uma etapa ou tarefa, atualize os checkboxes correspondentes em `docs/arquitetura_cadastro_alunos.md` e, se novos termos surgirem, registre-os imediatamente em `CONTEXT.md`.
 
 ---

@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# pre-commit.sh — PreToolUse Hook de Segurança para o Antigravity
+# pre-commit.sh — PreToolUse Hook de Segurança e Qualidade para o Antigravity
 #
-# Intercepta invocações de run_command contendo 'git commit' ou 'git add'
-# e bloqueia sumariamente vazamento de segredos (.env, .db, .sqlite3, .key, .pem).
+# 1. Bloqueia sumariamente vazamento de segredos (.env, .db, .sqlite3, .key, .pem).
+# 2. Ao tentar 'git commit', executa o validador mestre ./scripts/verify.sh.
+#    Se qualquer teste ou build falhar, nega o commit e exige correção pela IA.
 # ==============================================================================
 
 set -euo pipefail
@@ -34,6 +35,20 @@ EOF
 {
   "decision": "deny",
   "reason": "BLOQUEIO DE SEGURANÇA: Tentativa de commitar arquivos sensíveis em staging: ${ESCAPED_FILES}. Remova-os do git stage antes de continuar."
+}
+EOF
+        exit 0
+      fi
+
+      # 3. Executa o validador mestre verify.sh antes de permitir o commit
+      REPO_ROOT="$(git rev-parse --show-toplevel)"
+      VERIFY_OUTPUT=""
+      if ! VERIFY_OUTPUT=$("$REPO_ROOT/scripts/verify.sh" 2>&1); then
+        ESCAPED_OUTPUT=$(echo "$VERIFY_OUTPUT" | tail -n 25 | jq -s -R .)
+        cat <<EOF
+{
+  "decision": "deny",
+  "reason": "BLOQUEIO DE QUALIDADE: A validação em ./scripts/verify.sh falhou! O agente deve analisar o erro e corrigir o código antes de commitar:\n" + ${ESCAPED_OUTPUT}
 }
 EOF
         exit 0
