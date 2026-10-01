@@ -27,11 +27,20 @@ MAGENTA="\033[0;35m"
 RED="\033[0;31m"
 RESET="\033[0m"
 
+# Carrega variáveis de ambiente se o arquivo .env existir
+if [ -f "$REPO_ROOT/.env" ]; then
+  set -a
+  # shellcheck source=/dev/null
+  source "$REPO_ROOT/.env"
+  set +a
+fi
+
 run_backend=true
 run_frontend=true
 run_seed=false
-backend_port=8000
-frontend_port=5173
+backend_host="${BACKEND_HOST:-127.0.0.1}"
+backend_port="${BACKEND_PORT:-8000}"
+frontend_port="${FRONTEND_PORT:-${VITE_PORT:-5173}}"
 
 # Processamento de argumentos
 while [[ $# -gt 0 ]]; do
@@ -163,7 +172,7 @@ echo -e "${BLUE}------------------------------------------------------${RESET}\n
 # Inicializa o Backend
 if [ "$run_backend" = true ]; then
   cd backend
-  ./.venv/bin/uvicorn app.main:app --reload --port "$backend_port" &
+  ./.venv/bin/uvicorn app.main:app --reload --host "$backend_host" --port "$backend_port" &
   BACKEND_PID=$!
   cd "$REPO_ROOT"
 fi

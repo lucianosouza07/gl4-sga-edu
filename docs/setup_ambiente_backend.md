@@ -139,6 +139,18 @@ python -c "import fastapi, sqlalchemy, pydantic, passlib, jwt, pytest, httpx; pr
 
 ---
 
+### 7. Configuração das Variáveis de Ambiente (`.env`)
+
+Copie o modelo canônico `.env.example` da raiz do projeto para criar o arquivo `.env` local:
+
+```bash
+cp ../.env.example ../.env
+```
+
+O arquivo `.env` centraliza portas do backend/frontend, conexões de banco de dados (`DATABASE_URL`), segredos JWT, seeds padrão e regras de CORS.
+
+---
+
 ## 📌 Comandos Úteis do Dia a Dia
 
 | Ação | Comando |

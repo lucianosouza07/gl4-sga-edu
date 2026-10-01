@@ -1,15 +1,15 @@
-import os
 from datetime import datetime, timedelta, timezone
 import jwt
 from passlib.context import CryptContext
+from app.core.config import settings
 
 # Configuração de hash de senhas via Bcrypt
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Configurações do JWT
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "chave_secreta_padrao_para_dev_gl4_sga_edu_2026")
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
+JWT_SECRET_KEY = settings.JWT_SECRET_KEY
+JWT_ALGORITHM = settings.JWT_ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 
 def gerar_hash_senha(senha: str) -> str:

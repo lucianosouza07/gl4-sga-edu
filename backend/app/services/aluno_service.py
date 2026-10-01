@@ -9,9 +9,9 @@ from sqlalchemy.orm import Session
 from app.models.aluno import Aluno, StatusAluno
 from app.models.sequencia_matricula import SequenciaMatricula
 from app.models.usuario import Usuario, PerfilUsuario
-from app.schemas.aluno import AlunoCreate, AlunoUpdate
-from app.core.security import gerar_hash_senha
-from app.core.exceptions import RegistroJaExisteError, EntidadeNaoEncontradaError
+from app.schemas.aluno import AlunoCreate, AlunoUpdate, AlunoMeUpdate
+from app.core.security import gerar_hash_senha, verificar_senha
+from app.core.exceptions import RegistroJaExisteError, EntidadeNaoEncontradaError, RequisicaoInvalidaError
 
 
 def periodo_matricula_atual() -> tuple[int, int]:
@@ -208,3 +208,30 @@ class AlunoService:
         self.db.commit()
         self.db.refresh(aluno)
         return aluno
+
+    def atualizar_me(self, usuario_id: uuid.UUID, dados: AlunoMeUpdate) -> Aluno:
+        """
+        Permite ao Aluno autenticado atualizar informações permitidas de seu próprio cadastro:
+        - Telefone de contato
+        - Troca segura de senha (exige validação de senha_atual)
+        """
+        aluno = self.obter_aluno_por_usuario_id(usuario_id)
+
+        # 1. Se solicitou alteração de senha
+        if dados.nova_senha is not None:
+            if not dados.senha_atual:
+                raise RequisicaoInvalidaError("A senha atual é obrigatória para definir uma nova senha.")
+
+            if not aluno.usuario or not verificar_senha(dados.senha_atual, aluno.usuario.senha_hash):
+                raise RequisicaoInvalidaError("A senha atual informada está incorreta.")
+
+            aluno.usuario.senha_hash = gerar_hash_senha(dados.nova_senha)
+
+        # 2. Se informou novo telefone
+        if dados.telefone is not None:
+            aluno.telefone = dados.telefone
+
+        self.db.commit()
+        self.db.refresh(aluno)
+        return aluno
+

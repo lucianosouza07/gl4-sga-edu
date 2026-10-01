@@ -1,10 +1,10 @@
-import os
 from collections.abc import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
+from app.core.config import settings
 
-# Lê a URL do banco da variável de ambiente ou usa SQLite local por padrão
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sga_edu.db")
+# Lê a URL do banco das configurações centralizadas
+DATABASE_URL = settings.DATABASE_URL
 
 # Ajuste específico de concorrência para SQLite
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
@@ -12,7 +12,7 @@ connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite")
 engine = create_engine(
     DATABASE_URL,
     connect_args=connect_args,
-    echo=os.getenv("SQL_ECHO", "False").lower() in ("true", "1")
+    echo=settings.SQL_ECHO
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

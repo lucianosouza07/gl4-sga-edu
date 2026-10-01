@@ -8,6 +8,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.database.session import init_db, SessionLocal
 from app.seeds.admin_seed import seed_admin_padrao
 from app.api.v1.api import api_router
+from app.core.config import settings
 from app.core.exceptions import (
     DominioError,
     RegistroJaExisteError,
@@ -37,15 +38,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configuração de CORS para permitir requisições do frontend React / Vite
+# Configuração de CORS para permitir requisições configuradas no .env
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "https://gl4-sga-edu.luis-carvalho.online",
-    ],
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1|.*\.luis-carvalho\.online)(:\d+)?$",
+    allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=settings.CORS_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

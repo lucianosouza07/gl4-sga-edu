@@ -18,3 +18,8 @@ class EntidadeNaoEncontradaError(DominioError):
 class CredenciaisInvalidasError(DominioError):
     """Lançada quando autenticação falha por login/senha incorretos ou usuário inativo."""
     pass
+
+
+class RequisicaoInvalidaError(DominioError):
+    """Lançada quando os parâmetros de uma requisição violam regras de integridade do domínio."""
+    pass

@@ -16,9 +16,10 @@ htmlcov/
 *.db
 *.sqlite3
 
-# Variáveis de Ambiente
+# Variáveis de Ambiente (Permite apenas .env.example)
 .env
-.env.local
+.env.*
+!.env.example
 
 # Node / Frontend
 node_modules/

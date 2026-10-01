@@ -15,32 +15,55 @@ import {
 import { NavUser } from "./nav-user";
 import { Typography } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/features/auth";
 import {
   GraduationCap,
   LayoutDashboard,
   Users,
+  UserCheck,
   BookOpen,
   Settings,
   UserPlus,
+  Sparkles,
 } from "lucide-react";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation();
+  const { user } = useAuth();
 
-  const navItems = [
-    {
-      title: "Visão Geral",
-      url: "/",
-      icon: LayoutDashboard,
-      active: location.pathname === "/",
-    },
-    {
-      title: "Alunos",
-      url: "/alunos",
-      icon: Users,
-      active: location.pathname.startsWith("/alunos"),
-    },
-  ];
+  const isAluno = user?.perfil === "ALUNO";
+  const isAdminOrSecretaria = user?.perfil === "ADMIN" || user?.perfil === "SECRETARIA";
+
+  // Menu adaptativo baseado no perfil (Role Seam)
+  const navItems = isAluno
+    ? [
+        {
+          title: "Meu Portal",
+          url: "/",
+          icon: Sparkles,
+          active: location.pathname === "/",
+        },
+        {
+          title: "Meus Dados Cadastrais",
+          url: "/meus-dados",
+          icon: UserCheck,
+          active: location.pathname === "/meus-dados",
+        },
+      ]
+    : [
+        {
+          title: "Visão Geral",
+          url: "/",
+          icon: LayoutDashboard,
+          active: location.pathname === "/",
+        },
+        {
+          title: "Alunos",
+          url: "/alunos",
+          icon: Users,
+          active: location.pathname.startsWith("/alunos"),
+        },
+      ];
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -59,30 +82,33 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   GL4 SGA-EDU
                 </Typography>
                 <Typography variant="muted" className="text-xs">
-                  Gestão Acadêmica
+                  {isAluno ? "Portal do Aluno" : "Gestão Acadêmica"}
                 </Typography>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
 
-        <div className="pt-2 px-1 group-data-[collapsible=icon]:hidden">
-          <Button
-            nativeButton={false}
-            className="w-full justify-start gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs font-medium text-sm h-9 rounded-lg"
-            render={<Link to="/alunos" />}
-          >
-            <UserPlus className="h-4 w-4 shrink-0" />
-            <span>Novo Aluno</span>
-          </Button>
-        </div>
+        {/* Botão de Ação Rápida Exclusivo para Administração */}
+        {isAdminOrSecretaria && (
+          <div className="pt-2 px-1 group-data-[collapsible=icon]:hidden">
+            <Button
+              nativeButton={false}
+              className="w-full justify-start gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs font-medium text-sm h-9 rounded-lg"
+              render={<Link to="/alunos" />}
+            >
+              <UserPlus className="h-4 w-4 shrink-0" />
+              <span>Novo Aluno</span>
+            </Button>
+          </div>
+        )}
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>
             <Typography variant="muted" className="text-xs uppercase tracking-wider font-semibold">
-              Módulos Acadêmicos
+              {isAluno ? "Autoatendimento Discente" : "Módulos Acadêmicos"}
             </Typography>
           </SidebarGroupLabel>
           <SidebarGroupContent>

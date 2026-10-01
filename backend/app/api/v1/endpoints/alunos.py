@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.database.session import get_db
 from app.models.usuario import Usuario, PerfilUsuario
-from app.schemas.aluno import AlunoCreate, AlunoUpdate, AlunoResponse
+from app.schemas.aluno import AlunoCreate, AlunoUpdate, AlunoMeUpdate, AlunoResponse
 from app.schemas.paginacao import PaginaResponse
 from app.services.aluno_service import AlunoService
 from app.core.exceptions import RegistroJaExisteError, EntidadeNaoEncontradaError
@@ -93,6 +93,26 @@ def obter_me(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=erro.mensagem
         )
+
+
+@router.put(
+    "/me",
+    response_model=AlunoResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Atualizar perfil do aluno autenticado (Self-Service)"
+)
+def atualizar_me(
+    dados: AlunoMeUpdate,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(require_roles([PerfilUsuario.ALUNO]))
+) -> AlunoResponse:
+    """
+    Permite ao Aluno autenticado atualizar seu telefone ou trocar sua senha de acesso.
+    Campos civis (CPF, Matrícula, Email, Nome) são protegidos e imutáveis por este endpoint.
+    """
+    aluno_service = AlunoService(db)
+    aluno = aluno_service.atualizar_me(current_user.id, dados)
+    return AlunoResponse.model_validate(aluno)
 
 
 @router.get(

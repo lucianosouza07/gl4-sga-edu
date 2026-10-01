@@ -7,6 +7,7 @@ Este arquivo é a **fonte única de regras e governança do repositório para ag
 ## 📚 Referências Oficiais do Projeto
 
 - **[CONTEXT.md](CONTEXT.md)**: Vocabulário ubíquo e limites canônicos do domínio (Usuário, Aluno, Professor, Matrícula).
+- **[docs/arquitetura_multi_role_codebase_design.md](docs/arquitetura_multi_role_codebase_design.md)**: Guia mestre de arquitetura para expansão multi-role e design de módulos profundos (Domain-First com Costuras de Papel).
 - **[docs/arquitetura_cadastro_alunos.md](docs/arquitetura_cadastro_alunos.md)**: Documento mestre de arquitetura, contratos de API, schemas, regras de negócio e roteiro passo a passo do módulo de Alunos.
 - **[docs/arquitetura_autenticacao_rbac.md](docs/arquitetura_autenticacao_rbac.md)**: Especificação completa de segurança, JWT Bearer Token, roles (ADMIN, SECRETARIA, PROFESSOR, ALUNO) e proteção via FastAPI Dependencies.
 - **[docs/planejamento_fase1_frontend.md](docs/planejamento_fase1_frontend.md)**: Guia de frontend com Vite, React, Tailwind CSS v4 e shadcn/ui com tema Meridian.
@@ -45,6 +46,12 @@ Este arquivo é a **fonte única de regras e governança do repositório para ag
 
 7. **TypeScript Strict no Frontend:**
    - Mantenha o TypeScript em modo estrito. **Não utilize o tipo `any`**. Use interfaces em `src/types/`.
+
+8. **Arquitetura Multi-Role e Codebase Design (Domain-First vs Role-First):**
+   - É **proibido** criar silos duplicados por perfil (ex: `admin/`, `aluno/`, `professor/`) que contenham regras de negócio ou formulários duplicados.
+   - Regras de negócio, cálculos acadêmicos e integridade pertencem a **Módulos Profundos** em `app/services/` (Backend).
+   - O controle de perfil é aplicado nas **Costuras de API** (endpoints com `require_roles`, com rotas `/me` blindadas contra IDOR).
+   - No Frontend, componentes visuais e hooks de domínio residem em `src/features/<dominio>/`, enquanto as telas de autoatendimento e dashboards residem em portais leves de orquestração (`src/features/portal-<role>/`). Consulte `docs/arquitetura_multi_role_codebase_design.md`.
 
 ---
 

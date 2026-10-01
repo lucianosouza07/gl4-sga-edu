@@ -322,3 +322,154 @@ def test_reativar_aluno_inexistente_retorna_404(client: TestClient, secretaria_h
     )
 
     assert response.status_code == 404
+
+
+def test_aluno_me_atualizar_telefone_sucesso(client: TestClient, secretaria_headers: dict):
+    # 1. Cadastra aluno
+    criado = client.post("/api/v1/alunos", json={
+        "nome_completo": "Aluno Telefone Edit",
+        "cpf": "11122233344",
+        "email": "aluno.tel@gl4.edu",
+        "telefone": "71999990001",
+        "data_nascimento": "2000-01-01",
+    }, headers=secretaria_headers).json()
+
+    # 2. Login do aluno
+    login = client.post("/api/v1/auth/login", json={
+        "identificador": criado["email"], "senha": "Mudar@123",
+    })
+    headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+
+    # 3. Atualiza telefone
+    response = client.put("/api/v1/alunos/me", json={
+        "telefone": "71988887777"
+    }, headers=headers)
+
+    assert response.status_code == 200
+    assert response.json()["telefone"] == "71988887777"
+    assert response.json()["nome_completo"] == "Aluno Telefone Edit"
+    assert response.json()["cpf"] == "11122233344"
+
+
+def test_aluno_me_atualizar_senha_sucesso(client: TestClient, secretaria_headers: dict):
+    # 1. Cadastra aluno
+    criado = client.post("/api/v1/alunos", json={
+        "nome_completo": "Aluno Senha Edit",
+        "cpf": "22233344455",
+        "email": "aluno.senha@gl4.edu",
+        "data_nascimento": "2000-02-02",
+    }, headers=secretaria_headers).json()
+
+    # 2. Login com senha padrão
+    login = client.post("/api/v1/auth/login", json={
+        "identificador": criado["email"], "senha": "Mudar@123",
+    })
+    headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+
+    # 3. Altera a senha
+    response = client.put("/api/v1/alunos/me", json={
+        "senha_atual": "Mudar@123",
+        "nova_senha": "NovaSenhaSegura@2026"
+    }, headers=headers)
+
+    assert response.status_code == 200
+
+    # 4. Login com senha antiga deve falhar
+    login_antigo = client.post("/api/v1/auth/login", json={
+        "identificador": criado["email"], "senha": "Mudar@123",
+    })
+    assert login_antigo.status_code == 401
+
+    # 5. Login com nova senha deve suceder
+    login_novo = client.post("/api/v1/auth/login", json={
+        "identificador": criado["email"], "senha": "NovaSenhaSegura@2026",
+    })
+    assert login_novo.status_code == 200
+
+
+def test_aluno_me_atualizar_senha_com_senha_atual_errada_falha(client: TestClient, secretaria_headers: dict):
+    criado = client.post("/api/v1/alunos", json={
+        "nome_completo": "Aluno Senha Errada",
+        "cpf": "33344455566",
+        "email": "aluno.errada@gl4.edu",
+        "data_nascimento": "2000-03-03",
+    }, headers=secretaria_headers).json()
+
+    login = client.post("/api/v1/auth/login", json={
+        "identificador": criado["email"], "senha": "Mudar@123",
+    })
+    headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+
+    response = client.put("/api/v1/alunos/me", json={
+        "senha_atual": "SenhaIncorreta@123",
+        "nova_senha": "NovaSenha@2026"
+    }, headers=headers)
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "A senha atual informada está incorreta."
+
+
+def test_aluno_me_atualizar_senha_sem_senha_atual_falha(client: TestClient, secretaria_headers: dict):
+    criado = client.post("/api/v1/alunos", json={
+        "nome_completo": "Aluno Sem Senha Atual",
+        "cpf": "44455566677",
+        "email": "aluno.semsenhart@gl4.edu",
+        "data_nascimento": "2000-04-04",
+    }, headers=secretaria_headers).json()
+
+    login = client.post("/api/v1/auth/login", json={
+        "identificador": criado["email"], "senha": "Mudar@123",
+    })
+    headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+
+    response = client.put("/api/v1/alunos/me", json={
+        "nova_senha": "NovaSenha@2026"
+    }, headers=headers)
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "A senha atual é obrigatória para definir uma nova senha."
+
+
+def test_aluno_me_atualizar_sem_aluno_vinculado_retorna_404(client: TestClient, aluno_headers: dict):
+    response = client.put("/api/v1/alunos/me", json={
+        "telefone": "71999998888"
+    }, headers=aluno_headers)
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Aluno vinculado ao usuário não encontrado."
+
+
+
+@pytest.mark.parametrize("perfil", [PerfilUsuario.ADMIN, PerfilUsuario.SECRETARIA, PerfilUsuario.PROFESSOR])
+def test_aluno_me_atualizacao_negada_para_outros_perfis(
+    client: TestClient, db_session: Session, aluno_user: Usuario,
+    aluno_headers: dict, perfil: PerfilUsuario,
+):
+    aluno_user.perfil = perfil.value
+    db_session.commit()
+
+    response = client.put("/api/v1/alunos/me", json={
+        "telefone": "71999998888"
+    }, headers=aluno_headers)
+
+    assert response.status_code == 403
+
+
+
+def test_aluno_me_atualizacao_sem_token_retorna_401(client: TestClient):
+    response = client.put("/api/v1/alunos/me", json={
+        "telefone": "71999998888"
+    })
+
+    assert response.status_code == 401
+
+
+def test_aluno_me_campos_extras_ou_imutaveis_rejeitados(client: TestClient, aluno_headers: dict):
+    # Tentativa de injetar CPF ou Matrícula deve ser rejeitada pelo Pydantic (extra="forbid")
+    response = client.put("/api/v1/alunos/me", json={
+        "cpf": "99999999999",
+        "telefone": "71999998888"
+    }, headers=aluno_headers)
+
+    assert response.status_code == 422
+

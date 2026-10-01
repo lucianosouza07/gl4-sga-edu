@@ -256,3 +256,19 @@ export function ProtectedRoute({ allowedRoles, children }: ProtectedRouteProps) 
 - Estilizada com o tema **Meridian** e suporte a modo claro/escuro.
 - Re-exportada na Seam pública `src/features/auth/index.ts`.
 
+---
+
+## 8. Diretrizes para Expansão Multi-Role (Codebase Design)
+
+Para adicionar novas funcionalidades que atendam a múltiplos perfis (como Notas, Frequência, Matrículas e Diários de Classe), consulte o documento oficial de governança:
+👉 **[Guia de Arquitetura Multi-Role e Codebase Design](arquitetura_multi_role_codebase_design.md)**.
+
+### Resumo dos Princípios Mandatórios:
+1. **Domain-First (Módulos Profundos):** Regras de negócio e cálculos acadêmicos residem exclusivamente em `app/services/` (backend) e são agnósticos de quem os consome.
+2. **Costuras de API (API Seams):**
+   - Self-service (`/api/v1/<recurso>/me`): Aluno acessa dados próprios sem passar ID, blindado contra IDOR.
+   - Operacional (`/api/v1/turmas/{id}/...`): Professor opera em entidades sob sua responsabilidade após validação de vínculo.
+   - Administrativo (`/api/v1/alunos/{id}/...`): Secretaria e Admin possuem visão global para gestão e auditoria.
+3. **Frontend Reutilizável:** Componentes visuais ricos (`<BoletimCard />`, `<GradeMatrixTable />`) ficam em `src/features/<dominio>/`, e as views dos portais (`portal-aluno/`, `portal-professor/`) apenas orquestram sua exibição.
+
+

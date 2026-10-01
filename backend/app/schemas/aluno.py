@@ -26,6 +26,15 @@ class AlunoUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class AlunoMeUpdate(BaseModel):
+    """Payload para autoatendimento e atualização do próprio perfil pelo aluno autenticado."""
+    telefone: Optional[str] = Field(None, max_length=20, description="Telefone de contato do aluno")
+    senha_atual: Optional[str] = Field(None, min_length=6, description="Senha atual para validação de segurança")
+    nova_senha: Optional[str] = Field(None, min_length=6, description="Nova senha desejada")
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class AlunoResponse(BaseModel):
     """Dados de exibição pública e retorno da API de Alunos."""
     id: uuid.UUID
