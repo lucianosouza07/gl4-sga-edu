@@ -796,13 +796,13 @@ Para orientar os estudos e a construção conjunta, divida o trabalho nos seguin
 
 ### 🧠 Etapa 3: Regras de Negócio e Testes (Backend)
 - [x] Criar os utilitários de segurança (`security.py`): hash de senha com bcrypt e geração/validação de JWT com PyJWT.
-- [ ] Criar os Schemas Pydantic de autenticação (`LoginRequest`, `TokenResponse`, `UsuarioResponse`) e de alunos (`AlunoCreate`, `AlunoUpdate`, `AlunoResponse`).
-- [ ] Implementar o `AuthService` com suporte a login flexível por e-mail ou matrícula.
-- [ ] Escrever o `AlunoService`:
+- [x] Criar os Schemas Pydantic de autenticação (`LoginRequest`, `TokenResponse`, `UsuarioResponse`) e de alunos (`AlunoCreate`, `AlunoUpdate`, `AlunoResponse`).
+- [x] Implementar o `AuthService` com suporte a login flexível por e-mail ou matrícula.
+- [x] Escrever o `AlunoService`:
   - Validação de matrícula existente.
   - Criação conjunta de `Usuario` + `Aluno` dentro da mesma transação com senha inicial padrão.
   - Implementação do método `inativar_aluno` (soft delete).
-- [ ] Criar os testes unitários e de integração com `pytest` (testes de autenticação, RBAC e alunos) e ver todos passarem no terminal!
+- [x] Criar os testes unitários e de integração com `pytest` (testes de autenticação, RBAC e alunos) e ver todos passarem no terminal!
 
 ### 🌐 Etapa 4: Expondo as Rotas da API (Backend)
 - [ ] Criar o router de autenticação `/api/v1/auth` (endpoints `/login` e `/me`).
