@@ -1,0 +1,32 @@
+{
+  "protect-config-files": {
+    "enabled": true,
+    "PreToolUse": [
+      {
+        "matcher": "replace_file_content|write_to_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ./scripts/guard_protected_files.py 2>/dev/null || python3 ../scripts/guard_protected_files.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "pre-commit-safety": {
+    "enabled": true,
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ./scripts/pre-commit.sh 2>/dev/null || bash ../scripts/pre-commit.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

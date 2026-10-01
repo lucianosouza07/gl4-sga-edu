@@ -21,3 +21,4 @@ def db_session() -> Session:
     finally:
         session.close()
         Base.metadata.drop_all(bind=test_engine)
+        test_engine.dispose()
