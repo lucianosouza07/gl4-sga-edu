@@ -1,54 +1,71 @@
-# 🎨 Planejamento de Conclusão da Etapa 1: Frontend com Vite, React, Tailwind e shadcn/ui
+# 🎨 Planejamento de Conclusão da Etapa 1: Frontend com Vite, React, Tailwind v4 e shadcn/ui
 
-Este documento detalha o planejamento e o passo a passo para finalizar a **Etapa 1 (Preparação do Terreno)** no Frontend, incluindo a inicialização com Vite, configuração do Tailwind CSS, configuração do **shadcn/ui** e aplicação do tema **Meridian** (Tweakcn).
+Este documento detalha o passo a passo oficial para finalizar a **Etapa 1 (Preparação do Terreno)** utilizando **Tailwind CSS v4**, o plugin oficial `@tailwindcss/vite`, **shadcn/ui (CLI 4.x)** e o tema **Meridian** do Tweakcn.
 
 ---
 
-## 🎯 Escopo da Conclusão da Etapa 1
+## 🎯 Escopo da Etapa 1 (Frontend com Tailwind v4)
 
-- [ ] Inicializar o frontend React + TypeScript com Vite.
-- [ ] Configurar os aliases de importação (`@/*`) no Vite e TypeScript.
-- [ ] Configurar o Tailwind CSS.
-- [ ] Inicializar o **shadcn/ui**.
-- [ ] Aplicar o tema **Meridian** via registro do Tweakcn:
-  `npx shadcn@latest add https://tweakcn.com/r/themes/cmojzn0oy000505ldam699poc`
-- [ ] Instalar dependências de comunicação e ícones (`axios`, `lucide-react`).
-- [ ] Instalar os componentes base do shadcn necessários para o módulo de alunos (`button`, `input`, `table`, `dialog`, `badge`, `card`, `label`, `sonner`).
-- [ ] Validar o servidor de desenvolvimento (`npm run dev`).
+- [x] Inicializar o frontend React + TypeScript com Vite.
+- [x] Instalar `@types/node` e configurar aliases de importação (`@/*`).
+- [x] Instalar o **Tailwind CSS v4** e o plugin oficial `@tailwindcss/vite`.
+- [x] Configurar o plugin `@tailwindcss/vite` no `vite.config.ts`.
+- [x] Atualizar o `src/index.css` com o tema Meridian e Tailwind v4.
+- [x] Executar o assistente do **shadcn/ui** (`npx shadcn@latest init`).
+- [x] Aplicar o tema **Meridian** via Tweakcn (`cmojzn0oy000505ldam699poc`).
+- [x] Instalar dependências complementares (`axios`, `lucide-react`).
+- [x] Instalar componentes do shadcn (`npx shadcn@latest add --all`).
+- [x] Envolver a aplicação no `TooltipProvider` no `src/main.tsx`.
+- [x] Validar o build de produção (`npm run build` passou com sucesso).
 
 ---
 
 ## 🛠️ Passo a Passo de Execução
 
-### Passo 1: Limpar e inicializar o projeto Vite
-Navegue até a pasta `frontend` e inicialize o template React com TypeScript:
+### Passo 1: Instalar Tailwind CSS v4 e o plugin Vite
+No diretório `frontend`:
 
 ```bash
-cd frontend
-
-# Se houver apenas a pasta placeholder 'modulo_id_name', inicialize o projeto com:
-npm create vite@latest . -- --template react-ts
+npm install tailwindcss @tailwindcss/vite
 ```
 
-> **Atenção:** Caso o instalador pergunte sobre sobrescrever arquivos vazios existentes no diretório, confirme para criar na raiz da pasta `frontend/`.
+> **Por que mudou?** No Tailwind v4, **não** se usa mais `npx tailwindcss init -p`, nem `postcss.config.js` ou `tailwind.config.js`. A compilação é ultra-rápida e controlada diretamente pelo plugin oficial do Vite (`@tailwindcss/vite`).
 
-Instale as dependências padrão do Node:
-```bash
-npm install
+---
+
+### Passo 2: Configurar o `vite.config.ts`
+Adicione o plugin `tailwindcss()` ao `vite.config.ts`:
+
+```typescript
+import path from "path";
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+});
 ```
 
 ---
 
-### Passo 2: Configurar Aliases de Caminho (`@/*`)
+### Passo 3: Configurar o `src/index.css`
+Substitua o conteúdo de `src/index.css` por apenas:
 
-Para que o shadcn/ui e os imports funcionem perfeitamente com `@/components/...`:
-
-1. Instale os tipos do Node para o TypeScript resolver `path`:
-```bash
-npm install -D @types/node
+```css
+@import "tailwindcss";
 ```
 
-2. Atualize o `tsconfig.json` (ou `tsconfig.app.json`):
+---
+
+### Passo 4: Garantir os Aliases no `tsconfig.app.json`
+Certifique-se de que o `frontend/tsconfig.app.json` também tenha:
+
 ```json
 {
   "compilerOptions": {
@@ -60,119 +77,45 @@ npm install -D @types/node
 }
 ```
 
-3. Atualize o `vite.config.ts`:
-```typescript
-import path from "path";
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
-
-export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
-});
-```
-
 ---
 
-### Passo 3: Configurar o Tailwind CSS
-
-Instale o Tailwind CSS e dependências utilitárias do ecossistema shadcn:
-
-```bash
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
-```
-
-Configure o arquivo `tailwind.config.js` com suporte a variáveis CSS e animações:
-```javascript
-/** @type {import('tailwindcss').Config} */
-export default {
-  darkMode: ["class"],
-  content: [
-    "./index.html",
-    "./src/**/*.{ts,tsx,js,jsx}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [require("tailwindcss-animate")],
-}
-```
-
----
-
-### Passo 4: Inicializar o shadcn/ui
-
-Execute o assistente do shadcn:
+### Passo 5: Inicializar o shadcn/ui com suporte a Tailwind v4
+Execute o CLI oficial do shadcn:
 
 ```bash
 npx shadcn@latest init
 ```
 
-Responda às perguntas recomendadas:
-- **Which style would you like to use?** › `New York` (ou `Default`)
-- **Which color would you like to use as base color?** › `Neutral` / `Slate`
-- **Do you want to use CSS variables for colors?** › `yes`
+O shadcn detectará automaticamente o Vite com `@tailwindcss/vite` e criará o `components.json` configurado para Tailwind v4.
 
 ---
 
-### Passo 5: Aplicar o Tema Customizado (Meridian - Tweakcn)
-
-Execute o comando fornecido para importar as variáveis e estilo do tema:
+### Passo 6: Aplicar o Tema Meridian (Tweakcn)
+Execute o comando para injetar as variáveis de cor oklch, fontes e sombras do tema:
 
 ```bash
 npx shadcn@latest add https://tweakcn.com/r/themes/cmojzn0oy000505ldam699poc
 ```
 
-> **Sobre o tema Meridian:**
-> - Paleta moderna em `oklch` com tons equilibrados para interfaces administrativas e educacionais.
-> - Suporte nativo a modo claro e modo escuro (`dark mode`).
-> - Tipografia limpa e sombras elegantes para cards e tabelas.
-
 ---
 
-### Passo 6: Instalar Dependências Complementares
-
-Instale o cliente HTTP e a biblioteca de ícones:
-
+### Passo 7: Instalar Bibliotecas Complementares
 ```bash
 npm install axios lucide-react
 ```
 
 ---
 
-### Passo 7: Instalar os Componentes do shadcn para o Cadastro de Alunos
-
-Adicione os componentes essenciais que utilizaremos nas telas da Etapa 5:
-
+### Passo 8: Instalar os Componentes de UI
 ```bash
 npx shadcn@latest add button input table dialog badge card label dropdown-menu sonner
 ```
 
 ---
 
-### Passo 8: Validação e Teste Local
-
-Inicie o servidor de desenvolvimento do Vite:
-
+### Passo 9: Validação
+Inicie o servidor de desenvolvimento:
 ```bash
 npm run dev
 ```
-
-Abra no navegador (normalmente `http://localhost:5173`) e confirme que o React está carregando com os estilos do Tailwind e shadcn/ui devidamente injetados.
-
----
-
-## 📋 Checklist de Entrega da Fase 1
-
-- [ ] Estrutura `frontend/src` gerada com Vite + React-TS
-- [ ] Path alias `@` configurado e validado
-- [ ] Tailwind CSS e `index.css` estilizados
-- [ ] `components.json` gerado pelo shadcn
-- [ ] Tema Meridian aplicado com sucesso
-- [ ] `axios` e `lucide-react` instalados no `package.json`
-- [ ] Componentes de UI instalados em `frontend/src/components/ui/`
+Verifique se a aplicação sobe em `http://localhost:5173` sem erros de importação ou estilo.
