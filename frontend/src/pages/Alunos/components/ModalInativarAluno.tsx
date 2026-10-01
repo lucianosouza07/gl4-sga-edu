@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Typography } from "@/components/ui/typography";
 import { toast } from "sonner";
-import { UserX, Loader2 } from "lucide-react";
+import { CircleAlert, UserX, Loader2 } from "lucide-react";
 
 interface ModalInativarAlunoProps {
   aluno: Aluno | null;
@@ -52,28 +52,42 @@ export const ModalInativarAluno: React.FC<ModalInativarAlunoProps> = ({
 
   return (
     <AlertDialog open={aberto} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-            <UserX className="h-6 w-6" />
+      <AlertDialogContent className="max-w-[calc(100%-2rem)] gap-0 overflow-hidden border-border/80 bg-card p-0 shadow-2xl sm:max-w-lg">
+        <AlertDialogHeader className="gap-5 p-6 pb-6 sm:text-center">
+          <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-destructive/10 text-destructive ring-8 ring-destructive/5">
+            <UserX className="size-6" aria-hidden="true" />
           </div>
-          <AlertDialogTitle className="text-center">
-            <Typography variant="h3">Confirmar Inativação</Typography>
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-center">
-            <Typography variant="muted">
-              Tem certeza que deseja inativar o(a) aluno(a){" "}
-              <strong>{aluno.nome_completo}</strong> (Matrícula: {aluno.matricula})?
+          <div className="space-y-2">
+            <AlertDialogTitle className="text-center">
+              <Typography variant="h3" className="text-xl font-semibold tracking-tight">
+                Confirmar inativação
+              </Typography>
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-sm leading-relaxed">
+              A inativação bloqueará imediatamente o acesso do aluno ao sistema. Confira os dados antes de continuar.
+            </AlertDialogDescription>
+          </div>
+
+          <div className="w-full rounded-lg border bg-muted/40 px-4 py-3 text-left">
+            <Typography variant="p" className="font-semibold text-foreground">
+              {aluno.nome_completo}
             </Typography>
-            <div className="mt-2 text-xs text-destructive font-medium">
-              Esta ação desativará o status do aluno e revogará imediatamente o acesso ao sistema.
-            </div>
-          </AlertDialogDescription>
+            <Typography variant="muted" className="mt-1 text-xs">
+              Matrícula <span className="font-mono text-foreground">{aluno.matricula}</span>
+            </Typography>
+          </div>
+
+          <div className="flex w-full gap-3 rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-left">
+            <CircleAlert className="mt-0.5 size-4 shrink-0 text-destructive" aria-hidden="true" />
+            <Typography variant="muted" className="text-xs leading-relaxed text-foreground/80">
+              O aluno perderá o acesso ao sistema imediatamente. O histórico acadêmico será preservado.
+            </Typography>
+          </div>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+        <AlertDialogFooter className="mx-0 mb-0 px-6 py-4 sm:flex-row">
           <AlertDialogCancel disabled={inativando}>Cancelar</AlertDialogCancel>
           <AlertDialogAction
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"
             onClick={handleConfirmar}
             disabled={inativando}
           >
@@ -83,7 +97,7 @@ export const ModalInativarAluno: React.FC<ModalInativarAlunoProps> = ({
                 Inativando...
               </>
             ) : (
-              "Sim, Inativar"
+              "Inativar aluno"
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

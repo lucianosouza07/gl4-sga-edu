@@ -54,7 +54,7 @@ export const TabelaAlunos: React.FC<TabelaAlunosProps> = ({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-card shadow-xs">
+    <div className="overflow-hidden">
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow>

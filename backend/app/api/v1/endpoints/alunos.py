@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.models.usuario import Usuario, PerfilUsuario
 from app.schemas.aluno import AlunoCreate, AlunoUpdate, AlunoResponse
+from app.schemas.paginacao import PaginaResponse
 from app.services.aluno_service import AlunoService
 from app.core.exceptions import RegistroJaExisteError, EntidadeNaoEncontradaError
 from app.api.deps import get_current_user, require_roles
@@ -41,29 +42,35 @@ def criar_aluno(
 
 @router.get(
     "",
-    response_model=list[AlunoResponse],
+    response_model=PaginaResponse[AlunoResponse],
     status_code=status.HTTP_200_OK,
-    summary="Listar alunos com filtros e busca"
+    summary="Listar alunos com filtros, busca e paginação"
 )
 def listar_alunos(
     busca: Optional[str] = Query(None, description="Filtro por nome ou matrícula"),
     apenas_ativos: bool = Query(True, description="Filtrar apenas alunos com status ATIVO"),
-    skip: int = Query(0, ge=0, description="Offset de paginação"),
-    limit: int = Query(100, ge=1, le=200, description="Limite por página"),
+    pagina: int = Query(1, ge=1, description="Número da página (iniciando em 1)"),
+    tamanho_pagina: int = Query(10, ge=1, le=100, description="Quantidade de registros por página"),
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(require_roles([PerfilUsuario.SECRETARIA, PerfilUsuario.ADMIN, PerfilUsuario.PROFESSOR]))
-) -> list[AlunoResponse]:
+) -> PaginaResponse[AlunoResponse]:
     """
-    Retorna a listagem de alunos cadastrados com suporte a busca dinâmica por texto.
+    Retorna a listagem paginada de alunos cadastrados com suporte a busca dinâmica por texto.
     """
     aluno_service = AlunoService(db)
-    alunos = aluno_service.listar_alunos(
+    resultado = aluno_service.listar_alunos(
         busca=busca,
         apenas_ativos=apenas_ativos,
-        skip=skip,
-        limit=limit
+        pagina=pagina,
+        tamanho_pagina=tamanho_pagina,
     )
-    return [AlunoResponse.model_validate(a) for a in alunos]
+    return PaginaResponse[AlunoResponse](
+        itens=[AlunoResponse.model_validate(a) for a in resultado["itens"]],
+        total=resultado["total"],
+        pagina=resultado["pagina"],
+        tamanho_pagina=resultado["tamanho_pagina"],
+        total_paginas=resultado["total_paginas"],
+    )
 
 
 @router.get(

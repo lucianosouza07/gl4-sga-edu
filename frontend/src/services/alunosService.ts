@@ -1,16 +1,15 @@
 import { api } from "@/services/api";
 import type { Aluno, AlunoCreate, AlunoUpdate } from "@/types/aluno";
+import type { PaginaResponse, PaginacaoParams } from "@/types/paginacao";
 
-export interface ListarAlunosFiltros {
+export interface ListarAlunosFiltros extends PaginacaoParams {
   busca?: string;
   apenas_ativos?: boolean;
-  skip?: number;
-  limit?: number;
 }
 
 export const alunosService = {
-  async listar(filtros?: ListarAlunosFiltros): Promise<Aluno[]> {
-    const response = await api.get<Aluno[]>("/alunos", {
+  async listar(filtros?: ListarAlunosFiltros): Promise<PaginaResponse<Aluno>> {
+    const response = await api.get<PaginaResponse<Aluno>>("/alunos", {
       params: filtros,
     });
     return response.data;

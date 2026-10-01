@@ -49,8 +49,8 @@ export function NavUser() {
               <SidebarMenuButton size="lg" className="aria-expanded:bg-muted" />
             }
           >
-            <Avatar className="size-8 rounded-lg bg-primary/10 text-primary font-semibold">
-              <AvatarFallback className="rounded-lg">{iniciais}</AvatarFallback>
+            <Avatar className="size-8  bg-primary/10 text-primary font-semibold">
+              <AvatarFallback className="">{iniciais}</AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{user.nome}</span>
@@ -69,8 +69,8 @@ export function NavUser() {
             <DropdownMenuGroup>
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-2 py-2 text-left text-sm">
-                  <Avatar className="size-9 rounded-lg bg-primary/10 text-primary font-semibold">
-                    <AvatarFallback className="rounded-lg">{iniciais}</AvatarFallback>
+                  <Avatar className="size-9  bg-primary/10 text-primary font-semibold">
+                    <AvatarFallback className="">{iniciais}</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <Typography variant="small" className="truncate font-medium">

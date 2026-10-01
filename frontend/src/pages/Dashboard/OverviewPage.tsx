@@ -15,8 +15,8 @@ export const OverviewPage: React.FC = () => {
   useEffect(() => {
     async function carregarMetricas() {
       try {
-        const alunos = await alunosService.listar({ apenas_ativos: true });
-        setTotalAlunos(alunos.length);
+        const dados = await alunosService.listar({ apenas_ativos: true, tamanho_pagina: 1 });
+        setTotalAlunos(dados.total);
       } catch {
         // Se aluno comum não tiver permissão para listar todos, trata silenciosamente
         setTotalAlunos(0);

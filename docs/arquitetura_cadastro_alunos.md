@@ -794,6 +794,8 @@ Para orientar os estudos e a construção conjunta, divida o trabalho nos seguin
 - [x] Criar o model `Aluno` com a chave estrangeira `usuario_id` e restrição `unique=True` em `matricula` e `cpf`.
 - [x] Criar o script/seed automático de inicialização do primeiro usuário Admin padrão (`admin@gl4.edu` / `admin123`).
 
+Para popular o banco local com 30 alunos fictícios ativos e testar a busca/paginação, execute `cd backend && python -m app.seeds.alunos_teste`. O seed é idempotente e preserva os registros de demonstração já existentes.
+
 ### 🧠 Etapa 3: Regras de Negócio e Testes (Backend)
 - [x] Criar os utilitários de segurança (`security.py`): hash de senha com bcrypt e geração/validação de JWT com PyJWT.
 - [x] Criar os Schemas Pydantic de autenticação (`LoginRequest`, `TokenResponse`, `UsuarioResponse`) e de alunos (`AlunoCreate`, `AlunoUpdate`, `AlunoResponse`).
@@ -857,4 +859,3 @@ classDiagram
     Aluno "1" --> "*" Nota : recebe
     Turma "1" --> "*" Nota : compõe
 ```
-

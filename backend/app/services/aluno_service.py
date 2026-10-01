@@ -1,5 +1,6 @@
+import math
 import uuid
-from typing import Optional
+from typing import Optional, Dict, Any
 from sqlalchemy.orm import Session
 from app.models.aluno import Aluno, StatusAluno
 from app.models.usuario import Usuario, PerfilUsuario
@@ -70,10 +71,15 @@ class AlunoService:
         self,
         busca: Optional[str] = None,
         apenas_ativos: bool = True,
-        skip: int = 0,
-        limit: int = 100
-    ) -> list[Aluno]:
-        """Lista alunos com suporte a filtro de busca por nome ou matrícula e paginação."""
+        pagina: int = 1,
+        tamanho_pagina: int = 10,
+    ) -> Dict[str, Any]:
+        """Lista alunos com suporte a filtro de busca por nome ou matrícula e paginação padrão."""
+        if pagina < 1:
+            pagina = 1
+        if tamanho_pagina < 1:
+            tamanho_pagina = 10
+
         query = self.db.query(Aluno)
         if apenas_ativos:
             query = query.filter(Aluno.status == StatusAluno.ATIVO.value)
@@ -82,7 +88,19 @@ class AlunoService:
             query = query.filter(
                 (Aluno.nome_completo.ilike(termo)) | (Aluno.matricula.ilike(termo))
             )
-        return query.order_by(Aluno.nome_completo).offset(skip).limit(limit).all()
+
+        total = query.count()
+        total_paginas = math.ceil(total / tamanho_pagina) if total > 0 else 0
+        offset = (pagina - 1) * tamanho_pagina
+        itens = query.order_by(Aluno.nome_completo).offset(offset).limit(tamanho_pagina).all()
+
+        return {
+            "itens": itens,
+            "total": total,
+            "pagina": pagina,
+            "tamanho_pagina": tamanho_pagina,
+            "total_paginas": total_paginas,
+        }
 
     def obter_aluno_por_id(self, aluno_id: uuid.UUID | str) -> Aluno:
         """Obtém um aluno pelo seu identificador único UUID."""

@@ -105,13 +105,13 @@ def test_listar_alunos_com_busca(client: TestClient, secretaria_headers: dict):
     # Listagem completa
     response = client.get("/api/v1/alunos", headers=secretaria_headers)
     assert response.status_code == 200
-    assert len(response.json()) >= 2
+    assert response.json()["total"] >= 2
 
     # Busca específica por nome
     res_busca = client.get("/api/v1/alunos?busca=Amanda", headers=secretaria_headers)
     assert res_busca.status_code == 200
-    assert len(res_busca.json()) == 1
-    assert res_busca.json()[0]["nome_completo"] == "Amanda Nogueira"
+    assert res_busca.json()["total"] == 1
+    assert res_busca.json()["itens"][0]["nome_completo"] == "Amanda Nogueira"
 
 
 def test_obter_aluno_por_id_sucesso(client: TestClient, secretaria_headers: dict):
@@ -172,4 +172,4 @@ def test_inativar_aluno_soft_delete(client: TestClient, secretaria_headers: dict
 
     # Na listagem de ativos (padrão), o aluno não deve mais aparecer
     res_ativos = client.get("/api/v1/alunos?apenas_ativos=true", headers=secretaria_headers)
-    assert not any(a["id"] == aluno_id for a in res_ativos.json())
+    assert not any(a["id"] == aluno_id for a in res_ativos.json()["itens"])

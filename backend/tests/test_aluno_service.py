@@ -140,13 +140,42 @@ def test_listar_alunos_com_filtro_busca(db_session: Session):
 
     # Busca por nome
     resultados = service.listar_alunos(busca="Fernanda")
-    assert len(resultados) == 1
-    assert resultados[0].matricula == "202610010"
+    assert resultados["total"] == 1
+    assert len(resultados["itens"]) == 1
+    assert resultados["itens"][0].matricula == "202610010"
 
     # Busca por matrícula
     resultados_matr = service.listar_alunos(busca="10020")
-    assert len(resultados_matr) == 1
-    assert resultados_matr[0].nome_completo == "Gabriel Souza"
+    assert resultados_matr["total"] == 1
+    assert len(resultados_matr["itens"]) == 1
+    assert resultados_matr["itens"][0].nome_completo == "Gabriel Souza"
+
+
+def test_listar_alunos_paginacao(db_session: Session):
+    service = AlunoService(db_session)
+    for i in range(1, 16):
+        service.criar_aluno(AlunoCreate(
+            matricula=f"202610{i:03d}",
+            nome_completo=f"Aluno Teste {i:02d}",
+            cpf=f"{i:011d}",
+            email=f"aluno{i}@gl4.edu",
+            data_nascimento=date(2000, 1, 1)
+        ))
+
+    # Página 1 com 10 por página
+    p1 = service.listar_alunos(pagina=1, tamanho_pagina=10)
+    assert p1["total"] == 15
+    assert len(p1["itens"]) == 10
+    assert p1["pagina"] == 1
+    assert p1["tamanho_pagina"] == 10
+    assert p1["total_paginas"] == 2
+
+    # Página 2 com 10 por página
+    p2 = service.listar_alunos(pagina=2, tamanho_pagina=10)
+    assert p2["total"] == 15
+    assert len(p2["itens"]) == 5
+    assert p2["pagina"] == 2
+    assert p2["total_paginas"] == 2
 
 
 def test_inativar_aluno_soft_delete(db_session: Session):
@@ -169,11 +198,11 @@ def test_inativar_aluno_soft_delete(db_session: Session):
 
     # Na listagem padrão (apenas ativos), não deve aparecer
     ativos = service.listar_alunos(apenas_ativos=True)
-    assert not any(a.id == aluno.id for a in ativos)
+    assert not any(a.id == aluno.id for a in ativos["itens"])
 
     # Na listagem com apenas_ativos=False, deve aparecer
     todos = service.listar_alunos(apenas_ativos=False)
-    assert any(a.id == aluno.id for a in todos)
+    assert any(a.id == aluno.id for a in todos["itens"])
 
 
 def test_obter_aluno_inexistente_lanca_excecao(db_session: Session):

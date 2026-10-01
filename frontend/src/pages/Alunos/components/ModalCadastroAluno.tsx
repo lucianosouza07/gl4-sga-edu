@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/field";
 import { toast } from "sonner";
 import { UserPlus, Loader2, AlertCircle } from "lucide-react";
+import { extrairErrosAPI } from "@/lib/errorHandler";
 
 interface ModalCadastroAlunoProps {
   aberto: boolean;
@@ -27,39 +28,54 @@ interface ModalCadastroAlunoProps {
   onSucesso: () => void;
 }
 
+const FORM_VAZIO: AlunoCreate = {
+  matricula: "",
+  nome_completo: "",
+  cpf: "",
+  email: "",
+  telefone: "",
+  data_nascimento: "",
+  senha_inicial: "",
+};
+
 export const ModalCadastroAluno: React.FC<ModalCadastroAlunoProps> = ({
   aberto,
   onOpenChange,
   onSucesso,
 }) => {
-  const [formData, setFormData] = useState<AlunoCreate>({
-    matricula: "",
-    nome_completo: "",
-    cpf: "",
-    email: "",
-    telefone: "",
-    data_nascimento: "",
-    senha_inicial: "",
-  });
-
-  const [erro, setErro] = useState<string | null>(null);
+  const [formData, setFormData] = useState<AlunoCreate>(FORM_VAZIO);
+  const [mensagemGeral, setMensagemGeral] = useState<string | null>(null);
+  const [errosPorCampo, setErrosPorCampo] = useState<Record<string, string>>({});
   const [salvando, setSalvando] = useState(false);
+
+  const limparErros = () => {
+    setMensagemGeral(null);
+    setErrosPorCampo({});
+  };
 
   const handleChange = (campo: keyof AlunoCreate, valor: string) => {
     setFormData((prev) => ({ ...prev, [campo]: valor }));
-    if (erro) setErro(null);
+    // Remove o erro específico do campo ao editar
+    if (errosPorCampo[campo]) {
+      setErrosPorCampo((prev) => {
+        const next = { ...prev };
+        delete next[campo];
+        return next;
+      });
+    }
+    if (Object.keys(errosPorCampo).length === 0) setMensagemGeral(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErro(null);
+    limparErros();
     setSalvando(true);
 
     try {
       const payload: AlunoCreate = {
         matricula: formData.matricula.trim(),
         nome_completo: formData.nome_completo.trim(),
-        cpf: formData.cpf.replace(/\D/g, ""), // Limpa pontuações
+        cpf: formData.cpf.replace(/\D/g, ""),
         email: formData.email.trim(),
         telefone: formData.telefone ? formData.telefone.trim() : null,
         data_nascimento: formData.data_nascimento,
@@ -71,27 +87,19 @@ export const ModalCadastroAluno: React.FC<ModalCadastroAlunoProps> = ({
         description: `Matrícula ${payload.matricula} vinculada à conta de usuário.`,
       });
 
-      // Limpa o formulário e fecha o modal
-      setFormData({
-        matricula: "",
-        nome_completo: "",
-        cpf: "",
-        email: "",
-        telefone: "",
-        data_nascimento: "",
-        senha_inicial: "",
-      });
+      setFormData(FORM_VAZIO);
       onOpenChange(false);
       onSucesso();
-    } catch (err: any) {
-      const msgErro =
-        err.response?.data?.detail ||
-        "Ocorreu um erro ao cadastrar o aluno. Verifique os dados.";
-      setErro(msgErro);
+    } catch (err: unknown) {
+      const { mensagemGeral: msg, errosPorCampo: campos } = extrairErrosAPI(err);
+      setMensagemGeral(msg);
+      setErrosPorCampo(campos);
     } finally {
       setSalvando(false);
     }
   };
+
+  const temErros = Object.keys(errosPorCampo).length > 0;
 
   return (
     <Dialog open={aberto} onOpenChange={onOpenChange}>
@@ -114,10 +122,25 @@ export const ModalCadastroAluno: React.FC<ModalCadastroAlunoProps> = ({
           </div>
         </DialogHeader>
 
-        {erro && (
-          <div className="flex items-center gap-2 p-3 text-sm rounded-lg bg-destructive/10 text-destructive border border-destructive/20 animate-in fade-in">
-            <AlertCircle className="h-4 w-4 shrink-0" />
-            <Typography variant="small">{erro}</Typography>
+        {/* Banner de erro geral */}
+        {mensagemGeral && (
+          <div className="flex flex-col gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 animate-in fade-in">
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <Typography variant="small" className="font-medium">
+                {mensagemGeral}
+              </Typography>
+            </div>
+            {/* Lista de erros específicos por campo */}
+            {temErros && (
+              <ul className="pl-6 space-y-0.5">
+                {Object.entries(errosPorCampo).map(([campo, mensagem]) => (
+                  <li key={campo} className="text-xs text-destructive/90 list-disc">
+                    <span className="font-semibold capitalize">{campo.replace(/_/g, " ")}</span>: {mensagem}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
 
@@ -137,10 +160,14 @@ export const ModalCadastroAluno: React.FC<ModalCadastroAlunoProps> = ({
                 onChange={(e) => handleChange("nome_completo", e.target.value)}
                 required
                 disabled={salvando}
+                className={errosPorCampo.nome_completo ? "border-destructive focus-visible:ring-destructive/30" : ""}
               />
+              {errosPorCampo.nome_completo && (
+                <p className="text-xs text-destructive mt-1">{errosPorCampo.nome_completo}</p>
+              )}
             </Field>
 
-            {/* Matrícula e CPF em 2 colunas */}
+            {/* Matrícula e CPF */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field>
                 <FieldLabel htmlFor="matricula">
@@ -155,7 +182,11 @@ export const ModalCadastroAluno: React.FC<ModalCadastroAlunoProps> = ({
                   onChange={(e) => handleChange("matricula", e.target.value)}
                   required
                   disabled={salvando}
+                  className={errosPorCampo.matricula ? "border-destructive focus-visible:ring-destructive/30" : ""}
                 />
+                {errosPorCampo.matricula && (
+                  <p className="text-xs text-destructive mt-1">{errosPorCampo.matricula}</p>
+                )}
               </Field>
 
               <Field>
@@ -172,11 +203,15 @@ export const ModalCadastroAluno: React.FC<ModalCadastroAlunoProps> = ({
                   required
                   maxLength={14}
                   disabled={salvando}
+                  className={errosPorCampo.cpf ? "border-destructive focus-visible:ring-destructive/30" : ""}
                 />
+                {errosPorCampo.cpf && (
+                  <p className="text-xs text-destructive mt-1">{errosPorCampo.cpf}</p>
+                )}
               </Field>
             </div>
 
-            {/* E-mail e Telefone em 2 colunas */}
+            {/* E-mail e Telefone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field>
                 <FieldLabel htmlFor="email">
@@ -192,7 +227,11 @@ export const ModalCadastroAluno: React.FC<ModalCadastroAlunoProps> = ({
                   onChange={(e) => handleChange("email", e.target.value)}
                   required
                   disabled={salvando}
+                  className={errosPorCampo.email ? "border-destructive focus-visible:ring-destructive/30" : ""}
                 />
+                {errosPorCampo.email && (
+                  <p className="text-xs text-destructive mt-1">{errosPorCampo.email}</p>
+                )}
               </Field>
 
               <Field>
@@ -205,7 +244,11 @@ export const ModalCadastroAluno: React.FC<ModalCadastroAlunoProps> = ({
                   value={formData.telefone || ""}
                   onChange={(e) => handleChange("telefone", e.target.value)}
                   disabled={salvando}
+                  className={errosPorCampo.telefone ? "border-destructive focus-visible:ring-destructive/30" : ""}
                 />
+                {errosPorCampo.telefone && (
+                  <p className="text-xs text-destructive mt-1">{errosPorCampo.telefone}</p>
+                )}
               </Field>
             </div>
 
@@ -224,7 +267,11 @@ export const ModalCadastroAluno: React.FC<ModalCadastroAlunoProps> = ({
                   onChange={(e) => handleChange("data_nascimento", e.target.value)}
                   required
                   disabled={salvando}
+                  className={errosPorCampo.data_nascimento ? "border-destructive focus-visible:ring-destructive/30" : ""}
                 />
+                {errosPorCampo.data_nascimento && (
+                  <p className="text-xs text-destructive mt-1">{errosPorCampo.data_nascimento}</p>
+                )}
               </Field>
 
               <Field>
@@ -252,7 +299,10 @@ export const ModalCadastroAluno: React.FC<ModalCadastroAlunoProps> = ({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                onOpenChange(false);
+                limparErros();
+              }}
               disabled={salvando}
             >
               Cancelar

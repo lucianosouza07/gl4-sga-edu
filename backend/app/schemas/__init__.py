@@ -1,5 +1,6 @@
 from app.schemas.auth import LoginRequest, UsuarioResponse, TokenResponse
 from app.schemas.aluno import AlunoCreate, AlunoUpdate, AlunoResponse
+from app.schemas.paginacao import PaginaResponse
 
 __all__ = [
     "LoginRequest",
@@ -8,4 +9,5 @@ __all__ = [
     "AlunoCreate",
     "AlunoUpdate",
     "AlunoResponse",
+    "PaginaResponse",
 ]

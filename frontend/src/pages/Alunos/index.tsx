@@ -5,6 +5,7 @@ import type { Aluno } from "@/types/aluno";
 import { TabelaAlunos } from "./components/TabelaAlunos";
 import { ModalCadastroAluno } from "./components/ModalCadastroAluno";
 import { ModalInativarAluno } from "./components/ModalInativarAluno";
+import { TabelaPaginacao } from "@/components/TabelaPaginacao";
 import { Typography } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,12 +16,20 @@ import { Badge } from "@/components/ui/badge";
 import { UserPlus, Search, RefreshCw, Users, UserCheck, UserX, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 
+const TAMANHO_PADRAO = 10;
+
 export const AlunosPage: React.FC = () => {
   const { user } = useAuth();
   const [alunos, setAlunos] = useState<Aluno[]>([]);
   const [carregando, setCarregando] = useState<boolean>(true);
   const [busca, setBusca] = useState<string>("");
   const [apenasAtivos, setApenasAtivos] = useState<boolean>(true);
+
+  // Paginação
+  const [pagina, setPagina] = useState<number>(1);
+  const [tamanho, setTamanho] = useState<number>(TAMANHO_PADRAO);
+  const [total, setTotal] = useState<number>(0);
+  const [totalPaginas, setTotalPaginas] = useState<number>(1);
 
   // Modais
   const [modalCadastroAberto, setModalCadastroAberto] = useState<boolean>(false);
@@ -34,23 +43,39 @@ export const AlunosPage: React.FC = () => {
       const dados = await alunosService.listar({
         busca: busca.trim() || undefined,
         apenas_ativos: apenasAtivos,
+        pagina,
+        tamanho_pagina: tamanho,
       });
-      setAlunos(dados);
-    } catch (err: any) {
-      const msg = err.response?.data?.detail || "Erro ao carregar lista de alunos.";
+      setAlunos(dados.itens);
+      setTotal(dados.total);
+      setTotalPaginas(dados.total_paginas);
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { detail?: string } } }).response?.data?.detail ||
+        "Erro ao carregar lista de alunos.";
       toast.error(msg);
     } finally {
       setCarregando(false);
     }
-  }, [busca, apenasAtivos]);
+  }, [busca, apenasAtivos, pagina, tamanho]);
 
+  // Ao mudar busca/filtros, volta para página 1
   useEffect(() => {
-    // Debounce simples para a busca por texto
+    setPagina(1);
+  }, [busca, apenasAtivos, tamanho]);
+
+  // Debounce para busca por texto
+  useEffect(() => {
     const timer = setTimeout(() => {
       carregarAlunos();
     }, 300);
     return () => clearTimeout(timer);
   }, [carregarAlunos]);
+
+  const handleTamanhoChange = (novoTamanho: number) => {
+    setTamanho(novoTamanho);
+    setPagina(1);
+  };
 
   const totalAtivos = alunos.filter((a) => a.status === "ATIVO").length;
   const totalInativos = alunos.filter((a) => a.status === "INATIVO").length;
@@ -75,19 +100,19 @@ export const AlunosPage: React.FC = () => {
         )}
       </div>
 
-      {/* Cards de Resumo Estilo Meridian */}
+      {/* Cards de Resumo */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="shadow-2xs border-border/80">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <Typography variant="muted" className="text-xs font-medium">
-              Total na Busca
+              Total Encontrados
             </Typography>
             <Badge variant="outline" className="text-[11px] font-mono">Geral</Badge>
           </CardHeader>
           <CardContent>
             <div className="flex items-baseline justify-between">
               <Typography variant="h2" className="text-2xl font-semibold tabular-nums">
-                {carregando ? "..." : alunos.length}
+                {carregando ? "..." : total}
               </Typography>
               <Users className="h-4 w-4 text-muted-foreground/60" />
             </div>
@@ -196,13 +221,29 @@ export const AlunosPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabela de Alunos */}
-      <TabelaAlunos
-        alunos={alunos}
-        carregando={carregando}
-        onSolicitarInativacao={(aluno) => setAlunoParaInativar(aluno)}
-        podeGerenciar={podeGerenciar}
-      />
+      {/* Tabela + Paginação */}
+      <div className="overflow-hidden rounded-xl border bg-card shadow-xs">
+        <TabelaAlunos
+          alunos={alunos}
+          carregando={carregando}
+          onSolicitarInativacao={(aluno) => setAlunoParaInativar(aluno)}
+          podeGerenciar={podeGerenciar}
+        />
+
+        {!carregando && total > 0 && (
+          <div className="px-4 pb-4">
+            <TabelaPaginacao
+              pagina={pagina}
+              totalPaginas={totalPaginas}
+              total={total}
+              tamanho={tamanho}
+              onPaginaChange={setPagina}
+              onTamanhoChange={handleTamanhoChange}
+              desabilitado={carregando}
+            />
+          </div>
+        )}
+      </div>
 
       {/* Modais */}
       <ModalCadastroAluno

@@ -49,10 +49,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
-              className="data-[slot=sidebar-menu-button]:p-2!"
               render={<Link to="/" />}
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs group-data-[collapsible=icon]:size-8">
                 <GraduationCap className="h-5 w-5" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
