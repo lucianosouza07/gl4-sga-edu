@@ -812,15 +812,15 @@ Para orientar os estudos e a construção conjunta, divida o trabalho nos seguin
 - [x] Abrir o navegador em `http://localhost:8000/docs` (Swagger) e testar login, geração de token Bearer e criação de alunos com autorização.
 
 ### 🎨 Etapa 5: Construindo as Telas (Frontend)
-- [ ] Configurar o cliente Axios (`api.ts`) com Interceptors automáticos para injetar o Bearer token e tratar 401.
-- [ ] Criar o `AuthContext` e o componente `<ProtectedRoute />` com validação de perfis permitidos.
-- [ ] Criar a tela de **Login** estilizada com shadcn/ui e tema Meridian.
-- [ ] Criar a página de **Listagem de Alunos** com uma tabela bonita e organizada.
-- [ ] Adicionar a **Barra de Busca** com filtro por nome e matrícula.
-- [ ] Criar o **Modal de Cadastro**:
+- [x] Configurar o cliente Axios (`api.ts`) com Interceptors automáticos para injetar o Bearer token e tratar 401.
+- [x] Criar o `AuthContext` e o componente `<ProtectedRoute />` com validação de perfis permitidos.
+- [x] Criar a tela de **Login** estilizada com shadcn/ui e tema Meridian.
+- [x] Criar a página de **Listagem de Alunos** com uma tabela bonita e organizada.
+- [x] Adicionar a **Barra de Busca** com filtro por nome e matrícula.
+- [x] Criar o **Modal de Cadastro**:
   - Campos com indicação visual de obrigatório (`*`).
   - Tratamento de erro caso a matrícula já exista (mensagem amigável).
-- [ ] Adicionar botão de **Inativar Aluno** com confirmação prévia para evitar cliques acidentais.
+- [x] Adicionar botão de **Inativar Aluno** com confirmação prévia para evitar cliques acidentais.
 
 ---
 
