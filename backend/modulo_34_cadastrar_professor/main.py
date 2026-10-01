@@ -1,6 +1,9 @@
-﻿from fastapi import FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.professores import router as professores_router
+try:
+    from professores import router as professores_router
+except ImportError:
+    from .professores import router as professores_router
 
 app = FastAPI(title="SGA-Edu | Cadastro de professor", version="0.1.0")
 
