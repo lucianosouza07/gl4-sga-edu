@@ -27,12 +27,22 @@ MAGENTA="\033[0;35m"
 RED="\033[0;31m"
 RESET="\033[0m"
 
-# Carrega variáveis de ambiente se o arquivo .env existir
+# Carrega variáveis de ambiente de forma segura se o arquivo .env existir
 if [ -f "$REPO_ROOT/.env" ]; then
-  set -a
-  # shellcheck source=/dev/null
-  source "$REPO_ROOT/.env"
-  set +a
+  while IFS= read -r line || [ -n "$line" ]; do
+    [[ "$line" =~ ^[[:space:]]*# ]] && continue
+    [[ -z "${line// }" ]] && continue
+    if [[ "$line" =~ ^[[:space:]]*(export[[:space:]]+)?([a-zA-Z_][a-zA-Z0-9_]*)=(.*)$ ]]; then
+      key="${BASH_REMATCH[2]}"
+      val="${BASH_REMATCH[3]}"
+      if [[ "$val" =~ ^\"(.*)\"$ ]]; then
+        val="${BASH_REMATCH[1]}"
+      elif [[ "$val" =~ ^\'(.*)\'$ ]]; then
+        val="${BASH_REMATCH[1]}"
+      fi
+      export "$key=$val"
+    fi
+  done < "$REPO_ROOT/.env"
 fi
 
 run_backend=true
