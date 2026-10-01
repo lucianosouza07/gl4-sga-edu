@@ -6,6 +6,14 @@ import { TabelaAlunos } from "./components/TabelaAlunos";
 import { ModalCadastroAluno } from "./components/ModalCadastroAluno";
 import { ModalInativarAluno } from "./components/ModalInativarAluno";
 import { TabelaPaginacao } from "@/components/TabelaPaginacao";
+import {
+  PageContainer,
+  PageHeader,
+  PageHeaderContent,
+  PageHeaderTitle,
+  PageHeaderDescription,
+  PageHeaderActions,
+} from "@/components/page-header";
 import { Typography } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +23,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, Search, RefreshCw, Users, UserCheck, UserX, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
+import { extrairErrosAPI } from "@/lib/errorHandler";
 
 const TAMANHO_PADRAO = 10;
 
@@ -34,6 +43,7 @@ export const AlunosPage: React.FC = () => {
   // Modais
   const [modalCadastroAberto, setModalCadastroAberto] = useState<boolean>(false);
   const [alunoParaInativar, setAlunoParaInativar] = useState<Aluno | null>(null);
+  const [reativandoId, setReativandoId] = useState<string | null>(null);
 
   const podeGerenciar = user?.perfil === "ADMIN" || user?.perfil === "SECRETARIA";
 
@@ -77,31 +87,46 @@ export const AlunosPage: React.FC = () => {
     setPagina(1);
   };
 
+  const handleReativar = async (aluno: Aluno) => {
+    setReativandoId(aluno.id);
+    try {
+      await alunosService.reativar(aluno.id);
+      toast.success("Aluno reativado com sucesso!", {
+        description: `O acesso de ${aluno.nome_completo} ao sistema foi restaurado.`,
+      });
+      await carregarAlunos();
+    } catch (err: unknown) {
+      toast.error(extrairErrosAPI(err).mensagemGeral || "Erro ao tentar reativar o aluno.");
+    } finally {
+      setReativandoId(null);
+    }
+  };
+
   const totalAtivos = alunos.filter((a) => a.status === "ATIVO").length;
   const totalInativos = alunos.filter((a) => a.status === "INATIVO").length;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Cabeçalho da Página */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <Typography variant="h2" className="text-2xl font-bold tracking-tight text-foreground">
-            Gestão de Alunos
-          </Typography>
-          <Typography variant="muted" className="text-sm mt-0.5">
+    <PageContainer>
+      {/* Cabeçalho Padronizado da Página */}
+      <PageHeader>
+        <PageHeaderContent>
+          <PageHeaderTitle>Gestão de Alunos</PageHeaderTitle>
+          <PageHeaderDescription>
             Cadastre, consulte e gerencie as matrículas e dados acadêmicos.
-          </Typography>
-        </div>
+          </PageHeaderDescription>
+        </PageHeaderContent>
         {podeGerenciar && (
-          <Button onClick={() => setModalCadastroAberto(true)} className="shrink-0 shadow-xs gap-2">
-            <UserPlus className="h-4 w-4" />
-            <span>Novo Aluno</span>
-          </Button>
+          <PageHeaderActions>
+            <Button onClick={() => setModalCadastroAberto(true)} className="shrink-0 shadow-xs gap-2">
+              <UserPlus className="h-4 w-4" />
+              <span>Novo Aluno</span>
+            </Button>
+          </PageHeaderActions>
         )}
-      </div>
+      </PageHeader>
 
       {/* Cards de Resumo */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Card className="shadow-2xs border-border/80">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <Typography variant="muted" className="text-xs font-medium">
@@ -222,11 +247,13 @@ export const AlunosPage: React.FC = () => {
       </div>
 
       {/* Tabela + Paginação */}
-      <div className="overflow-hidden rounded-xl border bg-card shadow-xs">
+      <div className="overflow-hidden rounded-xl border bg-card shadow-xs min-w-0 w-full">
         <TabelaAlunos
           alunos={alunos}
           carregando={carregando}
           onSolicitarInativacao={(aluno) => setAlunoParaInativar(aluno)}
+          onReativar={handleReativar}
+          reativandoId={reativandoId}
           podeGerenciar={podeGerenciar}
         />
 
@@ -258,6 +285,6 @@ export const AlunosPage: React.FC = () => {
         onOpenChange={(aberto) => !aberto && setAlunoParaInativar(null)}
         onSucesso={carregarAlunos}
       />
-    </div>
+    </PageContainer>
   );
 };

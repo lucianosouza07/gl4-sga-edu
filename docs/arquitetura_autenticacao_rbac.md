@@ -180,6 +180,32 @@ def criar_aluno(
 
 ---
 
+### 5.3. Consulta administrativa e consulta do próprio Aluno
+
+| Endpoint | Perfis permitidos | Cadastro consultado |
+| :--- | :--- | :--- |
+| `GET /api/v1/alunos/{aluno_id}` | SECRETARIA, ADMIN | Aluno indicado pelo UUID |
+| `GET /api/v1/alunos/me` | ALUNO | Aluno vinculado ao Usuário autenticado |
+
+A consulta `/alunos/me` utiliza `require_roles([PerfilUsuario.ALUNO])` e filtra por `Aluno.usuario_id == current_user.id`. Retorna `AlunoResponse`, sem senha ou hash de senha, e não aceita um ID para escolher outro cadastro. A consulta por UUID exige `require_roles([PerfilUsuario.SECRETARIA, PerfilUsuario.ADMIN])`, inclusive quando o UUID corresponde ao próprio Aluno.
+
+As duas rotas retornam `401` para autenticação inválida ou Usuário inativo e `403` para perfis não permitidos. `/alunos/me` retorna `404` se o Usuário não possuir Aluno vinculado; a consulta administrativa retorna `404` se o UUID não existir. Declare a rota fixa `/me` antes de `/{aluno_id}` para que o roteador não interprete `me` como UUID.
+
+### 5.4. Dashboard institucional
+
+`GET /api/v1/dashboard` declara explicitamente `Depends(require_roles([PerfilUsuario.ADMIN, PerfilUsuario.SECRETARIA]))`. Retorna métricas agregadas da instituição e até quatro cadastros recentes, somente com ID, nome, matrícula, status e criação.
+
+| Perfil / sessão | Resposta |
+| :--- | :--- |
+| ADMIN ou SECRETARIA autenticados | `200` |
+| PROFESSOR ou ALUNO autenticados | `403` |
+| Token ausente, inválido ou Usuário inativo | `401` |
+| Período diferente de `3`, `6` ou `ano`, com acesso autorizado | `422` |
+
+Na rota `/`, Professor e Aluno visualizam apenas boas-vindas com dados da sessão; o frontend não solicita métricas institucionais para esses perfis. O contrato e as regras dos indicadores estão em `docs/arquitetura_cadastro_alunos.md`, Etapa 5.
+
+---
+
 ## 6. Seed do Administrador Inicial (Startup)
 
 Para que o sistema seja utilizável desde a primeira inicialização:

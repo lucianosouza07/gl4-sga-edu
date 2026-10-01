@@ -8,9 +8,9 @@ export const DashboardLayout: React.FC = () => {
   return (
     <SidebarProvider>
       <AppSidebar variant="inset" />
-      <SidebarInset className="bg-card border border-border/70 shadow-xs">
+      <SidebarInset className="bg-card border border-border/70 shadow-xs min-w-0 h-svh flex flex-col overflow-hidden">
         <SiteHeader />
-        <main className="flex-1 p-4 lg:p-6 overflow-y-auto">
+        <main className="flex-1 min-w-0 w-full p-4 lg:p-6 overflow-y-auto overflow-x-hidden">
           <Outlet />
         </main>
       </SidebarInset>

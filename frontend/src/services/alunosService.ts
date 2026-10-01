@@ -34,4 +34,9 @@ export const alunosService = {
     const response = await api.patch<Aluno>(`/alunos/${id}/inativar`);
     return response.data;
   },
+
+  async reativar(id: string): Promise<Aluno> {
+    const response = await api.patch<Aluno>(`/alunos/${id}/reativar`);
+    return response.data;
+  },
 };

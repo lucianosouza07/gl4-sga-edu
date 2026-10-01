@@ -3,10 +3,10 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { LoginPage } from "@/pages/Login";
 import { DashboardLayout } from "@/pages/Dashboard/DashboardLayout";
 import { OverviewPage } from "@/pages/Dashboard/OverviewPage";
 import { AlunosPage } from "@/pages/Alunos";
+import LoginPage from "./pages/Login";
 
 export default function App() {
   return (

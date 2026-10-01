@@ -9,7 +9,7 @@ from app.schemas.aluno import AlunoCreate, AlunoUpdate, AlunoResponse
 from app.schemas.paginacao import PaginaResponse
 from app.services.aluno_service import AlunoService
 from app.core.exceptions import RegistroJaExisteError, EntidadeNaoEncontradaError
-from app.api.deps import get_current_user, require_roles
+from app.api.deps import require_roles
 
 router = APIRouter(prefix="/alunos", tags=["Alunos"])
 
@@ -74,6 +74,28 @@ def listar_alunos(
 
 
 @router.get(
+    "/me",
+    response_model=AlunoResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Obter perfil do aluno autenticado"
+)
+def obter_me(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(require_roles([PerfilUsuario.ALUNO]))
+) -> AlunoResponse:
+    """Retorna apenas o Aluno vinculado ao Usuário autenticado."""
+    aluno_service = AlunoService(db)
+    try:
+        aluno = aluno_service.obter_aluno_por_usuario_id(current_user.id)
+        return AlunoResponse.model_validate(aluno)
+    except EntidadeNaoEncontradaError as erro:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=erro.mensagem
+        )
+
+
+@router.get(
     "/{aluno_id}",
     response_model=AlunoResponse,
     status_code=status.HTTP_200_OK,
@@ -82,10 +104,11 @@ def listar_alunos(
 def obter_aluno(
     aluno_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(get_current_user)
+    current_user: Usuario = Depends(require_roles([PerfilUsuario.SECRETARIA, PerfilUsuario.ADMIN]))
 ) -> AlunoResponse:
     """
     Retorna os detalhes completos de um aluno específico pelo seu UUID.
+    Acesso restrito para SECRETARIA e ADMIN.
     """
     aluno_service = AlunoService(db)
     try:
@@ -144,6 +167,29 @@ def inativar_aluno(
     try:
         aluno_inativado = aluno_service.inativar_aluno(aluno_id)
         return AlunoResponse.model_validate(aluno_inativado)
+    except EntidadeNaoEncontradaError as erro:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=erro.mensagem
+        )
+
+
+@router.patch(
+    "/{aluno_id}/reativar",
+    response_model=AlunoResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Reativar aluno"
+)
+def reativar_aluno(
+    aluno_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(require_roles([PerfilUsuario.SECRETARIA, PerfilUsuario.ADMIN]))
+) -> AlunoResponse:
+    """Reativa o Aluno e restaura o acesso, restrito a SECRETARIA e ADMIN."""
+    aluno_service = AlunoService(db)
+    try:
+        aluno_reativado = aluno_service.reativar_aluno(aluno_id)
+        return AlunoResponse.model_validate(aluno_reativado)
     except EntidadeNaoEncontradaError as erro:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

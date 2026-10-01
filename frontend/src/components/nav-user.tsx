@@ -79,11 +79,6 @@ export function NavUser() {
                     <Typography variant="muted" className="truncate text-xs">
                       {user.email}
                     </Typography>
-                    <div className="mt-1">
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                        {user.perfil}
-                      </Badge>
-                    </div>
                   </div>
                 </div>
               </DropdownMenuLabel>

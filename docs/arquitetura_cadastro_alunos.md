@@ -445,9 +445,13 @@ Tabela dos endpoints que serão consumidos pelo Frontend:
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/v1/alunos` | Cadastra novo aluno e gera usuário | `201 Created` |
 | `GET` | `/api/v1/alunos` | Lista alunos com filtro de busca | `200 OK` |
-| `GET` | `/api/v1/alunos/{id}` | Retorna detalhes do aluno | `200 OK` |
+| `GET` | `/api/v1/alunos/me` | Retorna o próprio cadastro do Aluno autenticado (perfil ALUNO) | `200 OK` |
+| `GET` | `/api/v1/alunos/{id}` | Retorna detalhes do aluno (apenas SECRETARIA ou ADMIN) | `200 OK` |
 | `PUT` | `/api/v1/alunos/{id}` | Edita dados cadastrais | `200 OK` |
 | `PATCH`| `/api/v1/alunos/{id}/inativar` | Inativação lógica (Soft Delete) | `200 OK` |
+| `PATCH`| `/api/v1/alunos/{id}/reativar` | Reativa o aluno e o acesso ao sistema | `200 OK` |
+
+`GET /api/v1/alunos/me` exige JWT Bearer válido e perfil `ALUNO`. O backend utiliza o ID do Usuário autenticado para consultar `Aluno.usuario_id`; nenhum identificador enviado pelo cliente seleciona o cadastro. A resposta utiliza `AlunoResponse`, sem credenciais ou hash de senha. Retorna `401` para autenticação inválida ou Usuário inativo, `403` para outros perfis e `404` se não houver Aluno vinculado. A rota fixa `/me` deve ser registrada antes de `/{aluno_id}`.
 
 ```python
 # app/api/v1/endpoints/alunos.py
@@ -795,6 +799,7 @@ Para popular o banco local com 30 alunos fictícios ativos e testar a busca/pagi
   - Geração automática e imutável de matrícula única a cada cadastro de Aluno.
   - Criação conjunta de `Usuario` + `Aluno` dentro da mesma transação com senha inicial padrão.
   - Implementação do método `inativar_aluno` (soft delete).
+  - Implementação do método `reativar_aluno` para restaurar o status ATIVO e o acesso ao sistema.
 - [x] Criar os testes unitários e de integração com `pytest` (testes de autenticação, RBAC e alunos) e ver todos passarem no terminal!
 - [x] Gerar matrícula imutável por ano e semestre, com sequência atômica sem limite fixo.
 
@@ -802,6 +807,8 @@ Para popular o banco local com 30 alunos fictícios ativos e testar a busca/pagi
 - [x] Criar o router de autenticação `/api/v1/auth` (endpoints `/login` e `/me`).
 - [x] Implementar as dependências do FastAPI: `get_current_user` e `require_roles(["ADMIN", "SECRETARIA"])`.
 - [x] Criar o router `/api/v1/alunos` protegido com RBAC (apenas SECRETARIA ou ADMIN podem gerenciar alunos).
+- [x] Restringir `GET /api/v1/alunos/{id}` a SECRETARIA e ADMIN, com testes de acesso permitido e negado.
+- [x] Criar `GET /api/v1/alunos/me` exclusivo para ALUNO, consultando apenas o cadastro vinculado ao Usuário autenticado, com testes de isolamento, autenticação e RBAC.
 - [x] Conectar os endpoints ao `AlunoService`.
 - [x] Abrir o navegador em `http://localhost:8000/docs` (Swagger) e testar login, geração de token Bearer e criação de alunos com autorização.
 
@@ -815,6 +822,36 @@ Para popular o banco local com 30 alunos fictícios ativos e testar a busca/pagi
   - Campos com indicação visual de obrigatório (`*`).
   - Exibição da matrícula gerada pelo backend após o cadastro.
 - [x] Adicionar botão de **Inativar Aluno** com confirmação prévia para evitar cliques acidentais.
+- [x] Adicionar ação de **Reativar Aluno** para registros inativos na listagem completa.
+- [x] Prototipar três layouts do dashboard com o tema Meridian e componentes shadcn/ui. Protótipo e decisão pela opção A arquivados na branch `codex/prototype-dashboard` (commit `e3a3a03`, documento `docs/dashboard-prototype-decision.md` nessa branch).
+- [x] Implementar a opção A na rota `/` com dados reais da API, removendo as variações, o seletor, a interpretação de `variant` e o comando `prototype` do app definitivo.
+- [x] Criar serviço, schemas e endpoint institucional com agregações no banco, filtros de período e controle de acesso.
+- [x] Incluir atualização manual, cancelamento de consultas substituídas, Skeleton, estados vazios e erro com nova tentativa.
+- [x] Cobrir os cálculos e o acesso com testes isolados em SQLite em memória.
+- [x] Conferir filtros, atualização, retorno de Alunos, responsividade e temas no navegador conectado à API. Conferir Skeleton, vazio e erro em cópia isolada do banco, sem criar alunos ou alterar o banco principal.
+- [x] Concluir revisão independente sem apontamentos e validar com `./scripts/verify.sh`: 95 testes aprovados, auditoria shadcn e build (92% de cobertura geral; serviço e endpoint do dashboard com 100%).
+
+### Dashboard institucional — contrato e indicadores
+
+`GET /api/v1/dashboard?periodo=ano` aceita `3`, `6` e `ano` (padrão). Somente ADMIN e SECRETARIA acessam as métricas. Professor e Aluno recebem boas-vindas com nome e perfil da sessão na rota `/`, sem consultar esse endpoint.
+
+| Campo da resposta | Conteúdo |
+| :--- | :--- |
+| `gerado_em` | Instante UTC da consulta, ISO 8601 com fuso |
+| `ano`, `semestre` | Calendário civil atual em `America/Bahia` |
+| `periodo` | `chave`, `inicio` e `fim`, com datas locais |
+| `totais` | Todos os `alunos`, `ativos`, `inativos` e `novas_matriculas` do período |
+| `matriculas_por_mes` | Série cronológica de `{mes: YYYY-MM, total, parcial}`, incluindo meses vazios |
+| `alunos_por_status` | Contagens de todos os status persistidos, inclusive valores legados |
+| `ultimos_cadastros` | Até quatro registros: `id`, `nome_completo`, `matricula`, `status`, `criado_em` |
+
+As contagens de ativos e inativos usam exatamente `Aluno.status`, independentemente de `Usuario.ativo`. O total inclui todos os status e é o denominador dos percentuais. Novas matrículas são criações de `Aluno`, por `criado_em`; inativação e reativação não acrescentam matrículas.
+
+Três ou seis meses incluem o mês atual e os anteriores; o ano começa em janeiro. Os limites dos meses são calculados na Bahia e convertidos para UTC antes das consultas. A série inclui o mês atual como parcial e exclui criações posteriores ao instante da consulta. Datas persistidas sem fuso são tratadas como UTC. Não há migração nem preenchimento demonstrativo.
+
+O filtro altera somente novas matrículas e barras. Totais, rosca e últimos cadastros são institucionais. Cadastros recentes são ordenados por `criado_em DESC, id DESC`, com limite de quatro. As contagens são agregadas em SQL compatível com SQLite e PostgreSQL, sem carregar a listagem completa; a resposta não expõe CPF, e-mail ou credenciais.
+
+A página consulta ao abrir, ao retornar de Alunos, ao trocar o período e ao clicar em **Atualizar**. A última consulta bem-sucedida é exibida no fuso da Bahia. Consultas substituídas são canceladas; erros exibem Alert com **Tentar novamente**, sem transformar falhas em zeros. O destaque das barras usa o maior mês do período, escolhendo o mais recente em caso de empate.
 
 ---
 

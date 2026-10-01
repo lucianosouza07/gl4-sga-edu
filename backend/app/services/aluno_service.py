@@ -159,6 +159,13 @@ class AlunoService:
             raise EntidadeNaoEncontradaError(f"Aluno com ID '{aluno_id}' não encontrado.")
         return aluno
 
+    def obter_aluno_por_usuario_id(self, usuario_id: uuid.UUID) -> Aluno:
+        """Obtém exclusivamente o Aluno vinculado ao Usuário informado."""
+        aluno = self.db.query(Aluno).filter(Aluno.usuario_id == usuario_id).first()
+        if not aluno:
+            raise EntidadeNaoEncontradaError("Aluno vinculado ao usuário não encontrado.")
+        return aluno
+
     def inativar_aluno(self, aluno_id: uuid.UUID | str) -> Aluno:
         """
         Executa soft delete: altera status do Aluno para INATIVO e desativa o login do Usuario.
@@ -167,6 +174,17 @@ class AlunoService:
         aluno.status = StatusAluno.INATIVO.value
         if aluno.usuario:
             aluno.usuario.ativo = False
+
+        self.db.commit()
+        self.db.refresh(aluno)
+        return aluno
+
+    def reativar_aluno(self, aluno_id: uuid.UUID | str) -> Aluno:
+        """Reativa o Aluno e restaura o acesso do Usuario vinculado."""
+        aluno = self.obter_aluno_por_id(aluno_id)
+        aluno.status = StatusAluno.ATIVO.value
+        if aluno.usuario:
+            aluno.usuario.ativo = True
 
         self.db.commit()
         self.db.refresh(aluno)

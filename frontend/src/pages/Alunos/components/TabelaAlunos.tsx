@@ -12,12 +12,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
 import { Skeleton } from "@/components/ui/skeleton";
-import { UserX, Calendar, Phone, Mail, CheckCircle, XCircle, GraduationCap } from "lucide-react";
+import { UserX, UserCheck, Calendar, Phone, Mail, CheckCircle, XCircle, GraduationCap, Loader2 } from "lucide-react";
 
 interface TabelaAlunosProps {
   alunos: Aluno[];
   carregando: boolean;
   onSolicitarInativacao: (aluno: Aluno) => void;
+  onReativar: (aluno: Aluno) => void;
+  reativandoId: string | null;
   podeGerenciar: boolean;
 }
 
@@ -25,6 +27,8 @@ export const TabelaAlunos: React.FC<TabelaAlunosProps> = ({
   alunos,
   carregando,
   onSolicitarInativacao,
+  onReativar,
+  reativandoId,
   podeGerenciar,
 }) => {
   if (carregando) {
@@ -54,7 +58,7 @@ export const TabelaAlunos: React.FC<TabelaAlunosProps> = ({
   }
 
   return (
-    <div className="overflow-hidden">
+    <div className="w-full min-w-0">
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow>
@@ -68,7 +72,7 @@ export const TabelaAlunos: React.FC<TabelaAlunosProps> = ({
                 Nome Completo
               </Typography>
             </TableHead>
-            <TableHead className="w-[140px]">
+            <TableHead className="w-[140px] hidden sm:table-cell">
               <Typography variant="small" className="font-semibold">
                 CPF
               </Typography>
@@ -78,7 +82,7 @@ export const TabelaAlunos: React.FC<TabelaAlunosProps> = ({
                 Contato
               </Typography>
             </TableHead>
-            <TableHead className="w-[130px]">
+            <TableHead className="w-[130px] hidden lg:table-cell">
               <Typography variant="small" className="font-semibold">
                 Nascimento
               </Typography>
@@ -89,7 +93,7 @@ export const TabelaAlunos: React.FC<TabelaAlunosProps> = ({
               </Typography>
             </TableHead>
             {podeGerenciar && (
-              <TableHead className="w-[100px] text-right">
+              <TableHead className="w-[150px] text-right">
                 <Typography variant="small" className="font-semibold">
                   Ações
                 </Typography>
@@ -110,14 +114,14 @@ export const TabelaAlunos: React.FC<TabelaAlunosProps> = ({
                     {aluno.nome_completo}
                   </Typography>
                 </TableCell>
-                <TableCell className="font-mono text-xs text-muted-foreground">
+                <TableCell className="font-mono text-xs text-muted-foreground hidden sm:table-cell">
                   {aluno.cpf}
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col gap-0.5 text-xs">
-                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                    <span className="flex items-center gap-1.5 text-muted-foreground truncate max-w-[200px]" title={aluno.email}>
                       <Mail className="h-3 w-3 shrink-0" />
-                      {aluno.email}
+                      <span className="truncate">{aluno.email}</span>
                     </span>
                     {aluno.telefone && (
                       <span className="flex items-center gap-1.5 text-muted-foreground">
@@ -127,7 +131,7 @@ export const TabelaAlunos: React.FC<TabelaAlunosProps> = ({
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="text-xs text-muted-foreground">
+                <TableCell className="text-xs text-muted-foreground hidden lg:table-cell">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3 w-3 shrink-0" />
                     {aluno.data_nascimento}
@@ -162,6 +166,25 @@ export const TabelaAlunos: React.FC<TabelaAlunosProps> = ({
                       >
                         <UserX className="h-4 w-4 mr-1" />
                         <span className="text-xs">Inativar</span>
+                      </Button>
+                    )}
+                    {aluno.status === "INATIVO" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 text-emerald-700 hover:bg-emerald-600/10 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
+                        title="Reativar Aluno"
+                        onClick={() => onReativar(aluno)}
+                        disabled={reativandoId !== null}
+                      >
+                        {reativandoId === aluno.id ? (
+                          <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                        ) : (
+                          <UserCheck className="mr-1 h-4 w-4" />
+                        )}
+                        <span className="text-xs">
+                          {reativandoId === aluno.id ? "Reativando..." : "Reativar"}
+                        </span>
                       </Button>
                     )}
                   </TableCell>

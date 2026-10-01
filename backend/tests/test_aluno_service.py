@@ -1,4 +1,5 @@
 import pytest
+import uuid
 from datetime import date, datetime, timezone
 from sqlalchemy.orm import Session
 from app.models.usuario import Usuario, PerfilUsuario
@@ -298,6 +299,25 @@ def test_inativar_aluno_soft_delete(db_session: Session):
     assert any(a.id == aluno.id for a in todos["itens"])
 
 
+def test_reativar_aluno_restabelece_status_e_acesso(db_session: Session):
+    service = AlunoService(db_session)
+    aluno = service.criar_aluno(AlunoCreate(
+        nome_completo="Aluno Reativado",
+        cpf="31313131313",
+        email="reativado@gl4.edu",
+        data_nascimento=date(2000, 5, 10)
+    ))
+    service.inativar_aluno(aluno.id)
+
+    aluno_reativado = service.reativar_aluno(aluno.id)
+
+    assert aluno_reativado.status == StatusAluno.ATIVO.value
+    usuario = db_session.query(Usuario).filter(Usuario.id == aluno.usuario_id).first()
+    assert usuario.ativo is True
+    ativos = service.listar_alunos(apenas_ativos=True)
+    assert any(item.id == aluno.id for item in ativos["itens"])
+
+
 def test_obter_aluno_inexistente_lanca_excecao(db_session: Session):
     import uuid
     service = AlunoService(db_session)
@@ -305,6 +325,32 @@ def test_obter_aluno_inexistente_lanca_excecao(db_session: Session):
 
     with pytest.raises(EntidadeNaoEncontradaError, match="não encontrado"):
         service.obter_aluno_por_id(id_inexistente)
+
+
+def test_obter_aluno_por_usuario_id_retorna_aluno_vinculado(db_session: Session):
+    service = AlunoService(db_session)
+    outro = service.criar_aluno(AlunoCreate(
+        nome_completo="Outro Aluno",
+        cpf="60606060606",
+        email="outro.vinculo@gl4.edu",
+        data_nascimento=date(2001, 1, 1),
+    ))
+    proprio = service.criar_aluno(AlunoCreate(
+        nome_completo="Aluno Vinculado",
+        cpf="50505050505",
+        email="aluno.vinculado@gl4.edu",
+        data_nascimento=date(2002, 1, 1),
+    ))
+
+    resultado = service.obter_aluno_por_usuario_id(proprio.usuario_id)
+
+    assert resultado.id == proprio.id
+    assert resultado.id != outro.id
+
+
+def test_obter_aluno_por_usuario_id_sem_vinculo_lanca_excecao(db_session: Session):
+    with pytest.raises(EntidadeNaoEncontradaError, match="Aluno vinculado ao usuário não encontrado"):
+        AlunoService(db_session).obter_aluno_por_usuario_id(uuid.uuid4())
 
 
 def test_atualizar_aluno_com_sucesso(db_session: Session):

@@ -29,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Typography } from "@/components/ui/typography";
 
 interface TabelaPaginacaoProps {
@@ -75,10 +76,10 @@ export const TabelaPaginacao: React.FC<TabelaPaginacaoProps> = ({
   const paginas = gerarPaginas(pagina, totalPaginas);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t w-full min-w-0">
       {/* Indicador "Mostrando X-Y de Z" + seletor de tamanho */}
-      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-        <Typography variant="muted" className="text-xs tabular-nums">
+      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
+        <Typography variant="muted" className="text-xs whitespace-nowrap tabular-nums">
           Mostrando{" "}
           <span className="font-medium text-foreground">
             {inicio}–{fim}
@@ -87,8 +88,10 @@ export const TabelaPaginacao: React.FC<TabelaPaginacaoProps> = ({
           <span className="font-medium text-foreground">{total}</span> registros
         </Typography>
 
-        <div className="flex items-center gap-1.5">
-          <Typography variant="muted" className="text-xs hidden sm:inline">
+        <Separator orientation="vertical" className="hidden sm:block h-4" />
+
+        <div className="flex items-center gap-1.5 whitespace-nowrap">
+          <Typography variant="muted" className="text-xs">
             por página:
           </Typography>
           <Select
@@ -96,7 +99,7 @@ export const TabelaPaginacao: React.FC<TabelaPaginacaoProps> = ({
             onValueChange={(v) => onTamanhoChange(Number(v))}
             disabled={desabilitado}
           >
-            <SelectTrigger className="h-7 w-16 text-xs">
+            <SelectTrigger className="h-8 w-[70px] text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -112,10 +115,11 @@ export const TabelaPaginacao: React.FC<TabelaPaginacaoProps> = ({
 
       {/* Navegação de páginas */}
       {totalPaginas > 1 && (
-        <Pagination>
+        <Pagination className="w-full sm:w-auto mx-0 justify-center sm:justify-end">
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
+                text="Anterior"
                 onClick={() => onPaginaChange(Math.max(1, pagina - 1))}
                 aria-disabled={pagina === 1 || desabilitado}
                 className={
@@ -146,6 +150,7 @@ export const TabelaPaginacao: React.FC<TabelaPaginacaoProps> = ({
 
             <PaginationItem>
               <PaginationNext
+                text="Próximo"
                 onClick={() => onPaginaChange(Math.min(totalPaginas, pagina + 1))}
                 aria-disabled={pagina === totalPaginas || desabilitado}
                 className={
