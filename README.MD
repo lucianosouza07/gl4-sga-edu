@@ -42,7 +42,17 @@ Toda a arquitetura e governança do projeto estão detalhadas na pasta `docs/` e
 
 ## ⚡ Comandos Rápidos
 
-### 1. Validação Automatizada de Qualidade (All-in-One)
+### 1. Inicialização Rápida do Projeto (Backend + Frontend)
+Inicie todos os serviços simultaneamente de forma automatizada e com encerramento gracioso via `Ctrl+C`:
+
+```bash
+./start.sh            # Inicia Backend (FastAPI :8000) e Frontend (Vite :5173)
+./start.sh --seed     # Executa os seeds de banco e inicia ambos os serviços
+./start.sh --backend  # Inicia apenas a API FastAPI
+./start.sh --frontend # Inicia apenas o Frontend React
+```
+
+### 2. Validação Automatizada de Qualidade (All-in-One)
 O projeto conta com script de verificação integrado que roda testes do backend, linter de shadcn e build do frontend:
 
 ```bash

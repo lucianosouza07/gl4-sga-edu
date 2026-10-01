@@ -1,12 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, ProtectedRoute, LoginView } from "@/features/auth";
+import { DashboardLayout } from "@/components/layout";
+import { OverviewView } from "@/features/dashboard";
+import { AlunosView } from "@/features/alunos";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { DashboardLayout } from "@/pages/Dashboard/DashboardLayout";
-import { OverviewPage } from "@/pages/Dashboard/OverviewPage";
-import { AlunosPage } from "@/pages/Alunos";
-import LoginPage from "./pages/Login";
 
 export default function App() {
   return (
@@ -15,7 +13,7 @@ export default function App() {
         <TooltipProvider>
           <Routes>
             {/* Rota Pública de Login */}
-            <Route path="/login" element={<LoginPage />} />
+            <Route path="/login" element={<LoginView />} />
 
             {/* Rotas Autenticadas dentro do Dashboard */}
             <Route
@@ -27,14 +25,14 @@ export default function App() {
               }
             >
               {/* Visão Geral */}
-              <Route index element={<OverviewPage />} />
+              <Route index element={<OverviewView />} />
 
               {/* Módulo de Gestão Acadêmica - Alunos */}
               <Route
                 path="alunos"
                 element={
                   <ProtectedRoute allowedRoles={["ADMIN", "SECRETARIA", "PROFESSOR"]}>
-                    <AlunosPage />
+                    <AlunosView />
                   </ProtectedRoute>
                 }
               />

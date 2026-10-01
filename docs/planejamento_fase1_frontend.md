@@ -119,3 +119,16 @@ Inicie o servidor de desenvolvimento:
 npm run dev
 ```
 Verifique se a aplicação sobe em `http://localhost:5173` sem erros de importação ou estilo.
+
+---
+
+## 🏛️ Passo 10: Padrão Arquitetural de Pastas (Feature Slices & Codebase Design)
+
+O frontend adota a arquitetura modular orientada a **Features (Módulos Profundos)**:
+
+- `src/features/<feature>/`: Módulo autocontido (`auth`, `alunos`, `dashboard`), encapsulando `components/`, `data/`, `hooks/`, `services/`, `views/` e a seam pública `index.ts`.
+- `src/components/layout/`: Casca e navegação global da aplicação (`app-sidebar.tsx`, `site-header.tsx`, `dashboard-layout.tsx`).
+- `src/components/shared/`: Componentes universais compartilhados (`page-header.tsx`, `tabela-paginacao.tsx`, `theme-toggle.tsx`).
+- `src/components/ui/`: Primitivas atômicas do shadcn/ui.
+- `src/api/`: Instância central do Axios (`client.ts`) e parser universal de erros (`handle-api-error.ts`).
+

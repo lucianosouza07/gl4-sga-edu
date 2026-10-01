@@ -486,47 +486,85 @@ def inativar_aluno(aluno_id: str, db: Session = Depends(get_db)):
 
 ---
 
-## 5. O Frontend em React + Vite
+## 5. O Frontend em React + Vite (Arquitetura Orientada a Features)
 
-O React nos permite criar interfaces reativas e modulares baseadas em componentes.
+O React nos permite criar interfaces reativas e modulares baseadas em componentes. O projeto adota a arquitetura de **Módulos Profundos (Feature Slices)** inspirada no Viralforge e nos princípios de **Codebase Design**, onde cada domínio de negócio é encapsulado com seus próprios componentes, dados, hooks, serviços e visões.
 
-### 5.1. Estrutura de Pastas Sugerida para o Frontend
+### 5.1. Estrutura de Pastas Oficial do Frontend
 
 ```text
-frontend/
-├── src/
-│   ├── assets/              # Imagens, logotipos, ícones
-│   ├── components/          # Componentes reutilizáveis
-│   │   ├── Navbar.tsx
-│   │   ├── CampoTexto.tsx   # Input com label e indicação de obrigatório (*)
-│   │   └── ModalConfirmacao.tsx
-│   ├── pages/               # Telas da aplicação
-│   │   └── Alunos/
-│   │       ├── index.tsx                # Tela principal de listagem
-│   │       ├── components/
-│   │       │   ├── TabelaAlunos.tsx     # Tabela de dados
-│   │       │   ├── ModalFormAluno.tsx   # Modal de criar/editar
-│   │       │   └── BarraBusca.tsx       # Input de pesquisa
-│   ├── services/            # Comunicação com a API
-│   │   └── api.ts           # Configuração do Axios
-│   │   └── alunosService.ts # Funções que chamam a API
-│   ├── types/               # Tipagens TypeScript (interfaces)
-│   │   └── aluno.ts
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── index.css
+frontend/src/
+├── api/                             # Cliente HTTP global e interceptors
+│   ├── client.ts                    # Instância Axios (baseURL, bearer token e redirect 401)
+│   └── handle-api-error.ts          # Extração e tratamento universal de erros da API
+│
+├── assets/                          # Imagens, logotipos e ícones estáticos
+│
+├── components/                      # Componentes reutilizáveis puros
+│   ├── layout/                      # Estrutura de casca da aplicação e navegação
+│   │   ├── app-sidebar.tsx          # Barra lateral de navegação
+│   │   ├── site-header.tsx          # Cabeçalho global com ThemeToggle
+│   │   ├── dashboard-layout.tsx     # Layout mestre protegido com Outlet
+│   │   ├── nav-main.tsx
+│   │   ├── nav-user.tsx             # Menu do usuário com perfil e logout
+│   │   ├── nav-documents.tsx
+│   │   ├── nav-secondary.tsx
+│   │   └── index.ts
+│   ├── shared/                      # Componentes compartilhados entre módulos
+│   │   ├── page-header.tsx          # Cabeçalho padronizado de página
+│   │   ├── tabela-paginacao.tsx     # Barra de paginação com seletor de limite
+│   │   ├── theme-toggle.tsx         # Alternador de tema claro/escuro
+│   │   ├── data-table.tsx
+│   │   └── index.ts
+│   └── ui/                          # Primitivas shadcn/ui oficiais (Button, Dialog, Input, etc.)
+│
+├── features/                        # 🌟 Módulos Profundos de Domínio (Feature Slices)
+│   │
+│   ├── auth/                        # Domínio: IAM & Sessão (Usuário / Autenticação)
+│   │   ├── components/              # login-form.tsx, signup-form.tsx, protected-route.tsx
+│   │   ├── context/                 # auth-context.tsx
+│   │   ├── data/                    # auth.types.ts
+│   │   ├── hooks/                   # use-auth.ts
+│   │   ├── views/                   # login-view.tsx
+│   │   └── index.ts                 # Seam pública do módulo
+│   │
+│   ├── alunos/                      # Domínio: Gestão Acadêmica (Aluno / Matrícula)
+│   │   ├── components/              # tabela-alunos.tsx, modal-cadastro-aluno.tsx, modal-inativar-aluno.tsx
+│   │   ├── data/                    # aluno.types.ts
+│   │   ├── hooks/                   # use-alunos.ts (orquestração de busca, debounce, paginação e modais)
+│   │   ├── services/                # aluno.api.ts (chamadas HTTP REST para /alunos)
+│   │   ├── views/                   # alunos-view.tsx
+│   │   └── index.ts                 # Seam pública do módulo
+│   │
+│   └── dashboard/                   # Domínio: Indicadores e Métricas Gerais
+│       ├── components/              # dashboard-kpis.tsx, matriculas-bar-chart.tsx, situacao-alunos-pie-chart.tsx, ultimos-cadastros-table.tsx
+│       ├── data/                    # dashboard.types.ts
+│       ├── hooks/                   # use-dashboard.ts (orquestração de fetch e filtros de período)
+│       ├── services/                # dashboard.api.ts (chamadas HTTP REST para /dashboard)
+│       ├── views/                   # overview-view.tsx
+│       └── index.ts                 # Seam pública do módulo
+│
+├── lib/                             # Utilitários compartilhados puros (utils.ts)
+├── types/                           # Tipos genéricos transversais (paginacao.ts)
+├── App.tsx                          # Roteador central enxuto
+├── index.css                        # Tailwind v4 + tema Meridian
+├── main.tsx                         # Ponto de entrada React
 ├── package.json
 └── vite.config.ts
 ```
 
 ---
 
-### 5.2. Tipagem dos Dados (TypeScript)
+### 5.2. Tipagem dos Dados (`src/features/alunos/data/aluno.types.ts`)
 
-Garante que o desenvolvedor não tente acessar uma propriedade que não existe:
+Garanta que o desenvolvedor tenha suporte estrito de tipos sem utilizar `any`:
 
 ```typescript
-// src/types/aluno.ts
+// src/features/alunos/data/aluno.types.ts
+import type { PaginacaoParams } from "@/types/paginacao";
+
+export type AlunoStatus = "ATIVO" | "INATIVO" | "TRANCADO" | "FORMADO";
+
 export interface Aluno {
   id: string;
   usuario_id: string;
@@ -534,186 +572,94 @@ export interface Aluno {
   nome_completo: string;
   cpf: string;
   email: string;
-  telefone?: string;
+  telefone: string | null;
   data_nascimento: string;
-  status: 'ATIVO' | 'INATIVO';
+  status: AlunoStatus;
   criado_em: string;
+  atualizado_em: string;
 }
 
-export interface NovoAlunoForm {
+export interface AlunoCreate {
   nome_completo: string;
   cpf: string;
   email: string;
-  telefone?: string;
+  telefone?: string | null;
   data_nascimento: string;
+  senha_inicial?: string | null;
+}
+
+export interface AlunoUpdate {
+  nome_completo?: string;
+  telefone?: string | null;
+  data_nascimento?: string;
+}
+
+export interface ListarAlunosFiltros extends PaginacaoParams {
+  busca?: string;
+  apenas_ativos?: boolean;
 }
 ```
 
 ---
 
-### 5.3. Camada de Serviço Frontend (`alunosService.ts`)
+### 5.3. Camada de Serviço (`src/features/alunos/services/aluno.api.ts`)
 
 ```typescript
-// src/services/alunosService.ts
-import axios from 'axios';
-import { Aluno, NovoAlunoForm } from '../types/aluno';
+// src/features/alunos/services/aluno.api.ts
+import { apiClient } from "@/api/client";
+import type { Aluno, AlunoCreate, AlunoUpdate, ListarAlunosFiltros } from "../data/aluno.types";
+import type { PaginaResponse } from "@/types/paginacao";
 
-const api = axios.create({
-  baseURL: 'http://localhost:8000/api/v1',
-});
-
-export const alunosService = {
-  async listar(busca?: string): Promise<Aluno[]> {
-    const response = await api.get<Aluno[]>('/alunos', {
-      params: { busca },
+export const alunoApi = {
+  async listar(filtros?: ListarAlunosFiltros): Promise<PaginaResponse<Aluno>> {
+    const response = await apiClient.get<PaginaResponse<Aluno>>("/alunos", {
+      params: filtros,
     });
     return response.data;
   },
 
-  async criar(dados: NovoAlunoForm): Promise<Aluno> {
-    const response = await api.post<Aluno>('/alunos', dados);
+  async obterPorId(id: string): Promise<Aluno> {
+    const response = await apiClient.get<Aluno>(`/alunos/${id}`);
+    return response.data;
+  },
+
+  async cadastrar(dados: AlunoCreate): Promise<Aluno> {
+    const response = await apiClient.post<Aluno>("/alunos", dados);
+    return response.data;
+  },
+
+  async atualizar(id: string, dados: AlunoUpdate): Promise<Aluno> {
+    const response = await apiClient.put<Aluno>(`/alunos/${id}`, dados);
     return response.data;
   },
 
   async inativar(id: string): Promise<Aluno> {
-    const response = await api.patch<Aluno>(`/alunos/${id}/inativar`);
+    const response = await apiClient.patch<Aluno>(`/alunos/${id}/inativar`);
     return response.data;
-  }
+  },
+
+  async reativar(id: string): Promise<Aluno> {
+    const response = await apiClient.patch<Aluno>(`/alunos/${id}/reativar`);
+    return response.data;
+  },
 };
 ```
 
 ---
 
-### 5.4. Exemplo de Componente: Formulário com Validação Visual
+### 5.4. Interface Pública do Módulo (`src/features/alunos/index.ts`)
 
-Como atender ao critério: *"campos obrigatórios sinalizados e validação de erros"*:
+Atua como a **Seam (Costura)** pública da feature, expondo apenas o que as rotas e layout precisam consumir:
 
-```tsx
-// src/pages/Alunos/components/ModalFormAluno.tsx
-import React, { useState } from 'react';
-import { NovoAlunoForm } from '../../../types/aluno';
-
-interface Props {
-  aberto: boolean;
-  aoFechar: () => void;
-  aoSalvar: (dados: NovoAlunoForm) => Promise<void>;
-}
-
-export const ModalFormAluno: React.FC<Props> = ({ aberto, aoFechar, aoSalvar }) => {
-  const [form, setForm] = useState<NovoAlunoForm>({
-    nome_completo: '',
-    cpf: '',
-    email: '',
-    telefone: '',
-    data_nascimento: '',
-  });
-
-  const [erroApi, setErroApi] = useState<string | null>(null);
-  const [salvando, setSalvando] = useState(false);
-
-  if (!aberto) return null;
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErroApi(null);
-    setSalvando(true);
-
-    try {
-      await aoSalvar(form);
-      aoFechar();
-    } catch (err: any) {
-      // Exibe mensagem de erro devolvida pelo backend (ex: CPF ou e-mail duplicado)
-      setErroApi(err.response?.data?.detail || 'Erro ao cadastrar aluno.');
-    } finally {
-      setSalvando(false);
-    }
-  };
-
-  return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <h2>Cadastrar Novo Aluno</h2>
-        <p className="legenda">Campos com <span className="obrigatorio">*</span> são obrigatórios.</p>
-
-        {erroApi && <div className="alerta-erro">{erroApi}</div>}
-
-        <form onSubmit={handleSubmit}>
-          {/* A matrícula é gerada pelo backend após o cadastro. */}
-
-          <div className="campo">
-            <label>Nome Completo <span className="obrigatorio">*</span></label>
-            <input
-              type="text"
-              name="nome_completo"
-              value={form.nome_completo}
-              onChange={handleChange}
-              placeholder="Ex: Maria da Silva"
-              required
-            />
-          </div>
-
-          <div className="campo">
-            <label>CPF <span className="obrigatorio">*</span></label>
-            <input
-              type="text"
-              name="cpf"
-              value={form.cpf}
-              onChange={handleChange}
-              placeholder="000.000.000-00"
-              required
-            />
-          </div>
-
-          <div className="campo">
-            <label>E-mail Institucional <span className="obrigatorio">*</span></label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="aluno@universidade.edu.br"
-              required
-            />
-            <small>Este e-mail será usado como login do aluno no portal.</small>
-          </div>
-
-          <div className="campo">
-            <label>Data de Nascimento <span className="obrigatorio">*</span></label>
-            <input
-              type="date"
-              name="data_nascimento"
-              value={form.data_nascimento}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="campo">
-            <label>Telefone</label>
-            <input
-              type="text"
-              name="telefone"
-              value={form.telefone}
-              onChange={handleChange}
-              placeholder="(11) 98765-4321"
-            />
-          </div>
-
-          <div className="botoes-acao">
-            <button type="button" onClick={aoFechar} disabled={salvando}>Cancelar</button>
-            <button type="submit" className="btn-primario" disabled={salvando}>
-              {salvando ? 'Cadastrando...' : 'Cadastrar Aluno'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
+```typescript
+// src/features/alunos/index.ts
+export * from "./data/aluno.types";
+export * from "./services/aluno.api";
+export * from "./hooks/use-alunos";
+export * from "./components/tabela-alunos";
+export * from "./components/modal-cadastro-aluno";
+export * from "./components/modal-inativar-aluno";
+export * from "./views/alunos-view";
 ```
 
 ---

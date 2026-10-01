@@ -225,31 +225,34 @@ def seed_admin_inicial(db: Session):
 
 ---
 
-## 7. Integração no Frontend (React + shadcn/ui)
+## 7. Integração no Frontend (React + shadcn/ui + Feature Slices)
 
-### 7.1. Gerenciamento de Estado (`AuthContext.tsx`)
+### 7.1. Gerenciamento de Estado (`src/features/auth/context/auth-context.tsx`)
 - Mantém o objeto `user` e o `token` em estado global e sincronizado com o `localStorage`.
 - Expõe funções `login(identificador, senha)` e `logout()`.
+- Acessível através do hook `useAuth()` em `src/features/auth/hooks/use-auth.ts`.
 
-### 7.2. Interceptor Axios (`src/services/api.ts`)
+### 7.2. Cliente HTTP e Interceptor (`src/api/client.ts`)
 - **Request:** Adiciona `config.headers.Authorization = 'Bearer ' + token` automaticamente se o token existir.
 - **Response:** Em caso de `error.response?.status === 401`, remove o token e força redirecionamento para `/login`.
 
-### 7.3. Rota Protegida (`ProtectedRoute.tsx`)
+### 7.3. Rota Protegida (`src/features/auth/components/protected-route.tsx`)
 ```tsx
 export function ProtectedRoute({ allowedRoles, children }: ProtectedRouteProps) {
   const { user, isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) return <Spinner />;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (isLoading) return <Skeleton className="h-32 w-full" />;
+  if (!isAuthenticated || !user) return <Navigate to="/login" replace />;
   if (allowedRoles && !allowedRoles.includes(user.perfil)) {
-    return <Navigate to="/acesso-negado" replace />;
+    return <CardAcessoNaoAutorizado perfil={user.perfil} />;
   }
 
-  return children;
+  return children ? <>{children}</> : <Outlet />;
 }
 ```
 
-### 7.4. Tela de Login (`src/pages/Login/index.tsx`)
-- Desenvolvida com os componentes shadcn já instalados (`Card`, `Input`, `Label`, `Button`, `Badge`).
+### 7.4. Tela de Login (`src/features/auth/views/login-view.tsx`)
+- Desenvolvida com os componentes shadcn já instalados (`Card`, `Input`, `Field`, `Button`, `Badge`, `Typography`).
 - Estilizada com o tema **Meridian** e suporte a modo claro/escuro.
+- Re-exportada na Seam pública `src/features/auth/index.ts`.
+
