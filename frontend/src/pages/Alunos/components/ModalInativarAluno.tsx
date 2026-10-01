@@ -58,10 +58,8 @@ export const ModalInativarAluno: React.FC<ModalInativarAlunoProps> = ({
             <UserX className="size-6" aria-hidden="true" />
           </div>
           <div className="space-y-2">
-            <AlertDialogTitle className="text-center">
-              <Typography variant="h3" className="text-xl font-semibold tracking-tight">
-                Confirmar inativação
-              </Typography>
+            <AlertDialogTitle className="text-center text-xl font-semibold tracking-tight">
+              Confirmar inativação
             </AlertDialogTitle>
             <AlertDialogDescription className="text-center text-sm leading-relaxed">
               A inativação bloqueará imediatamente o acesso do aluno ao sistema. Confira os dados antes de continuar.

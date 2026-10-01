@@ -108,13 +108,11 @@ export const ModalCadastroAluno: React.FC<ModalCadastroAlunoProps> = ({
               <UserPlus className="h-5 w-5" />
             </div>
             <div>
-              <DialogTitle>
-                <Typography variant="h3">Cadastrar Novo Aluno</Typography>
+              <DialogTitle className="text-xl font-semibold tracking-tight">
+                Cadastrar Novo Aluno
               </DialogTitle>
-              <DialogDescription>
-                <Typography variant="muted">
-                  Preencha os dados acadêmicos e pessoais para gerar a matrícula e o acesso.
-                </Typography>
+              <DialogDescription className="text-sm text-muted-foreground">
+                Preencha os dados acadêmicos e pessoais para gerar a matrícula e o acesso.
               </DialogDescription>
             </div>
           </div>

@@ -40,7 +40,12 @@ app = FastAPI(
 # Configuração de CORS para permitir requisições do frontend React / Vite
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://gl4-sga-edu.luis-carvalho.online",
+    ],
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1|.*\.luis-carvalho\.online)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

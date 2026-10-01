@@ -1,3 +1,5 @@
+from datetime import datetime
+import math
 from sqlalchemy.orm import Session
 from app.models.usuario import Usuario, PerfilUsuario
 from app.core.security import verificar_senha
@@ -38,14 +40,30 @@ def test_seed_alunos_cria_registros_ativos_para_busca_e_paginacao(db_session: Se
     segundo_aluno = db_session.query(Aluno).filter(Aluno.email == "aluno.demo.0002@example.com").one()
     busca_por_matricula = service.listar_alunos(busca=segundo_aluno.matricula)
 
-    assert total == 30
-    assert db_session.query(Aluno).filter(Aluno.status == StatusAluno.ATIVO.value).count() == len(NOMES_DEMO)
+    assert total == len(NOMES_DEMO)
+    ativos = db_session.query(Aluno).filter(Aluno.status == StatusAluno.ATIVO.value).count()
+    inativos = db_session.query(Aluno).filter(Aluno.status == StatusAluno.INATIVO.value).count()
+    trancados = db_session.query(Aluno).filter(Aluno.status == StatusAluno.TRANCADO.value).count()
+    formados = db_session.query(Aluno).filter(Aluno.status == StatusAluno.FORMADO.value).count()
+
+    assert ativos == 34
+    assert inativos == 8
+    assert trancados == 4
+    assert formados == 2
+    assert ativos + inativos + trancados + formados == len(NOMES_DEMO)
+
+    # Valida distribuição temporal nos anos de 2025 e 2026 para os gráficos do dashboard
+    registros_2025 = db_session.query(Aluno).filter(Aluno.criado_em < datetime(2026, 1, 1)).count()
+    registros_2026 = db_session.query(Aluno).filter(Aluno.criado_em >= datetime(2026, 1, 1)).count()
+    assert registros_2025 == 8
+    assert registros_2026 == 40
+
     primeira_matricula = db_session.query(Aluno).filter(Aluno.email == "aluno.demo.0001@example.com").one()
     assert primeira_matricula.nome_completo == NOMES_DEMO[0]
     assert len(primeira_matricula.matricula) >= 9
     assert db_session.query(Usuario).filter(Usuario.email == "aluno.demo.0001@example.com").one().perfil == PerfilUsuario.ALUNO.value
     assert len(primeira_pagina["itens"]) == 10
-    assert primeira_pagina["total_paginas"] == 3
+    assert primeira_pagina["total_paginas"] == math.ceil(ativos / 10)
     assert [aluno.nome_completo for aluno in busca_por_nome["itens"]] == ["Fernanda Torres Macedo"]
     assert [aluno.matricula for aluno in busca_por_matricula["itens"]] == [segundo_aluno.matricula]
 
