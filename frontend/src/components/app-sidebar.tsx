@@ -68,6 +68,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
         <div className="pt-2 px-1 group-data-[collapsible=icon]:hidden">
           <Button
+            nativeButton={false}
             className="w-full justify-start gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs font-medium text-sm h-9 rounded-lg"
             render={<Link to="/alunos" />}
           >
