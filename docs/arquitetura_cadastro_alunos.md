@@ -773,9 +773,10 @@ def test_deve_falhar_ao_tentar_cadastrar_matricula_duplicada(client: TestClient)
 Para orientar os estudos e a construção conjunta, divida o trabalho nos seguintes passos:
 
 ### 🚀 Etapa 1: Preparação do Terreno (Ambiente)
-- [ ] Criar o ambiente virtual Python no backend (`python -m venv .venv`).
-- [ ] Instalar as dependências base: `fastapi`, `uvicorn`, `sqlalchemy`, `pydantic[email]`, `passlib[bcrypt]`, `pytest`.
+- [x] Criar o ambiente virtual Python no backend (`python -m venv .venv`).
+- [x] Instalar as dependências base: `fastapi`, `uvicorn`, `sqlalchemy`, `pydantic[email]`, `passlib[bcrypt]`, `pytest`.
 - [ ] Inicializar o frontend React com Vite: `npm create vite@latest frontend -- --template react-ts`.
+- [ ] Configurar Tailwind CSS, **shadcn/ui** e aplicar o tema Tweakcn Meridian (`cmojzn0oy000505ldam699poc`).
 - [ ] Instalar `axios` e `lucide-react` (ícones) no frontend.
 
 ### 🗄️ Etapa 2: Modelagem e Banco de Dados (Backend)
