@@ -1,0 +1,7 @@
+from fastapi import APIRouter
+from app.api.v1.endpoints.auth import router as auth_router
+from app.api.v1.endpoints.alunos import router as alunos_router
+
+api_router = APIRouter()
+api_router.include_router(auth_router)
+api_router.include_router(alunos_router)

@@ -805,11 +805,11 @@ Para orientar os estudos e a construção conjunta, divida o trabalho nos seguin
 - [x] Criar os testes unitários e de integração com `pytest` (testes de autenticação, RBAC e alunos) e ver todos passarem no terminal!
 
 ### 🌐 Etapa 4: Expondo as Rotas da API (Backend)
-- [ ] Criar o router de autenticação `/api/v1/auth` (endpoints `/login` e `/me`).
-- [ ] Implementar as dependências do FastAPI: `get_current_user` e `require_roles(["ADMIN", "SECRETARIA"])`.
-- [ ] Criar o router `/api/v1/alunos` protegido com RBAC (apenas SECRETARIA ou ADMIN podem gerenciar alunos).
-- [ ] Conectar os endpoints ao `AlunoService`.
-- [ ] Abrir o navegador em `http://localhost:8000/docs` (Swagger) e testar login, geração de token Bearer e criação de alunos com autorização.
+- [x] Criar o router de autenticação `/api/v1/auth` (endpoints `/login` e `/me`).
+- [x] Implementar as dependências do FastAPI: `get_current_user` e `require_roles(["ADMIN", "SECRETARIA"])`.
+- [x] Criar o router `/api/v1/alunos` protegido com RBAC (apenas SECRETARIA ou ADMIN podem gerenciar alunos).
+- [x] Conectar os endpoints ao `AlunoService`.
+- [x] Abrir o navegador em `http://localhost:8000/docs` (Swagger) e testar login, geração de token Bearer e criação de alunos com autorização.
 
 ### 🎨 Etapa 5: Construindo as Telas (Frontend)
 - [ ] Configurar o cliente Axios (`api.ts`) com Interceptors automáticos para injetar o Bearer token e tratar 401.
