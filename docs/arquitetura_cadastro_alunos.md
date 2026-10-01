@@ -781,24 +781,31 @@ Para orientar os estudos e a construção conjunta, divida o trabalho nos seguin
 
 ### 🗄️ Etapa 2: Modelagem e Banco de Dados (Backend)
 - [ ] Criar a configuração do SQLAlchemy (`session.py`).
-- [ ] Criar o model `Usuario` com campos de login e perfil Enum (`PerfilUsuario`).
+- [ ] Criar o model `Usuario` com campos de login (`email`, `senha_hash`, `ativo`) e perfil Enum (`PerfilUsuario`: ADMIN, SECRETARIA, PROFESSOR, ALUNO).
 - [ ] Criar o model `Aluno` com a chave estrangeira `usuario_id` e restrição `unique=True` em `matricula` e `cpf`.
+- [ ] Criar o script/seed automático de inicialização do primeiro usuário Admin padrão (`admin@gl4.edu` / `admin123`).
 
 ### 🧠 Etapa 3: Regras de Negócio e Testes (Backend)
-- [ ] Criar os Schemas Pydantic (`AlunoCreate`, `AlunoUpdate`, `AlunoResponse`).
+- [ ] Criar os utilitários de segurança (`security.py`): hash de senha com bcrypt e geração/validação de JWT com PyJWT.
+- [ ] Criar os Schemas Pydantic de autenticação (`LoginRequest`, `TokenResponse`, `UsuarioResponse`) e de alunos (`AlunoCreate`, `AlunoUpdate`, `AlunoResponse`).
+- [ ] Implementar o `AuthService` com suporte a login flexível por e-mail ou matrícula.
 - [ ] Escrever o `AlunoService`:
   - Validação de matrícula existente.
-  - Criação conjunta de `Usuario` + `Aluno` dentro da mesma transação.
+  - Criação conjunta de `Usuario` + `Aluno` dentro da mesma transação com senha inicial padrão.
   - Implementação do método `inativar_aluno` (soft delete).
-- [ ] Criar os testes unitários e de integração com `pytest` e ver todos passarem no terminal!
+- [ ] Criar os testes unitários e de integração com `pytest` (testes de autenticação, RBAC e alunos) e ver todos passarem no terminal!
 
 ### 🌐 Etapa 4: Expondo as Rotas da API (Backend)
-- [ ] Criar o router `/api/v1/alunos`.
+- [ ] Criar o router de autenticação `/api/v1/auth` (endpoints `/login` e `/me`).
+- [ ] Implementar as dependências do FastAPI: `get_current_user` e `require_roles(["ADMIN", "SECRETARIA"])`.
+- [ ] Criar o router `/api/v1/alunos` protegido com RBAC (apenas SECRETARIA ou ADMIN podem gerenciar alunos).
 - [ ] Conectar os endpoints ao `AlunoService`.
-- [ ] Abrir o navegador em `http://localhost:8000/docs` (Swagger) e testar a criação de alunos manualmente pela interface interativa.
+- [ ] Abrir o navegador em `http://localhost:8000/docs` (Swagger) e testar login, geração de token Bearer e criação de alunos com autorização.
 
 ### 🎨 Etapa 5: Construindo as Telas (Frontend)
-- [ ] Configurar o cliente Axios apontando para `http://localhost:8000`.
+- [ ] Configurar o cliente Axios (`api.ts`) com Interceptors automáticos para injetar o Bearer token e tratar 401.
+- [ ] Criar o `AuthContext` e o componente `<ProtectedRoute />` com validação de perfis permitidos.
+- [ ] Criar a tela de **Login** estilizada com shadcn/ui e tema Meridian.
 - [ ] Criar a página de **Listagem de Alunos** com uma tabela bonita e organizada.
 - [ ] Adicionar a **Barra de Busca** com filtro por nome e matrícula.
 - [ ] Criar o **Modal de Cadastro**:
