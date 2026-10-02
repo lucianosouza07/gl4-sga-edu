@@ -1,21 +1,29 @@
--- MySQL Workbench Forward Engineering / Schema SGA-Edu
+-- =====================================================
+-- SGA-Edu | Script de Inicialização Completa do Banco
+-- Módulo 29: Modelagem de Banco de Dados
+-- =====================================================
 
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
--- -----------------------------------------------------
--- Table `Perfil` (RBAC)
--- -----------------------------------------------------
+-- 1. Criação da Tabela Perfil (RBAC)
 CREATE TABLE IF NOT EXISTS `Perfil` (
   `id_perfil` INT NOT NULL AUTO_INCREMENT,
   `nome_perfil` VARCHAR(50) NOT NULL,
   PRIMARY KEY (`id_perfil`)
 ) ENGINE = InnoDB;
 
--- -----------------------------------------------------
--- Table `Usuario`
--- -----------------------------------------------------
+-- 2. Seed dos 5 perfis RBAC da Sprint 1
+INSERT INTO `Perfil` (`id_perfil`, `nome_perfil`) VALUES 
+(1, 'Aluno'), 
+(2, 'Professor'), 
+(3, 'Secretaria'), 
+(4, 'Financeiro'), 
+(5, 'Admin')
+ON DUPLICATE KEY UPDATE `nome_perfil` = VALUES(`nome_perfil`);
+
+-- 3. Criação da Tabela Usuario
 CREATE TABLE IF NOT EXISTS `Usuario` (
   `id_usuario` INT NOT NULL AUTO_INCREMENT,
   `login` VARCHAR(255) NOT NULL UNIQUE,
@@ -33,9 +41,7 @@ CREATE TABLE IF NOT EXISTS `Usuario` (
     ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
--- -----------------------------------------------------
--- Table `Aluno`
--- -----------------------------------------------------
+-- 4. Criação da Tabela Aluno
 CREATE TABLE IF NOT EXISTS `Aluno` (
   `matricula` INT NOT NULL,
   `Usuario_id_usuario` INT NOT NULL,
@@ -48,9 +54,7 @@ CREATE TABLE IF NOT EXISTS `Aluno` (
     ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
--- -----------------------------------------------------
--- Table `Professor`
--- -----------------------------------------------------
+-- 5. Criação da Tabela Professor (Alinhada com GL4-34)
 CREATE TABLE IF NOT EXISTS `Professor` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `nome` VARCHAR(120) NOT NULL,
@@ -70,9 +74,7 @@ CREATE TABLE IF NOT EXISTS `Professor` (
     ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
--- -----------------------------------------------------
--- Table `FuncionarioAdministrativo`
--- -----------------------------------------------------
+-- 6. Criação da Tabela FuncionarioAdministrativo
 CREATE TABLE IF NOT EXISTS `FuncionarioAdministrativo` (
   `id_funcionario` INT NOT NULL AUTO_INCREMENT,
   `setor` VARCHAR(100) NOT NULL,
