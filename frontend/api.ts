@@ -104,3 +104,72 @@ export async function checarStatusBackend(): Promise<{ online: boolean; rotulo: 
     return { online: false, rotulo: "Sistema Operacional (Local)" };
   }
 }
+
+export interface LoginRequisicao {
+  login: string;
+  senha: string;
+}
+
+export interface UsuarioAutenticado {
+  id: number;
+  login: string;
+  nome: string;
+  perfil_id: number;
+  perfil_nome: string;
+  perfil_slug: string;
+  status_conta: number;
+}
+
+export interface LoginResposta {
+  sucesso: boolean;
+  mensagem: string;
+  usuario?: UsuarioAutenticado;
+  token_sessao?: string;
+  detalhe?: string;
+}
+
+export interface RecuperarSenhaResposta {
+  sucesso: boolean;
+  mensagem: string;
+  expira_em_minutos?: number;
+  detalhe?: string;
+}
+
+/** Realiza login contra o backend */
+export async function autenticarUsuario(dados: LoginRequisicao): Promise<LoginResposta> {
+  const resp = await fetch(`${API_BASE}/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(dados),
+  });
+
+  const corpo = await resp.json().catch(() => ({}));
+  if (!resp.ok) {
+    const detalhe = typeof corpo.detalhe === "string" ? corpo.detalhe : "Falha na autenticação.";
+    throw new Error(detalhe);
+  }
+  return corpo;
+}
+
+/** Solicita token de recuperação de senha */
+export async function solicitarRecuperacaoSenha(identificador: string): Promise<RecuperarSenhaResposta> {
+  const resp = await fetch(`${API_BASE}/auth/recuperar-senha`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ identificador }),
+  });
+
+  const corpo = await resp.json().catch(() => ({}));
+  if (!resp.ok) {
+    const detalhe = typeof corpo.detalhe === "string" ? corpo.detalhe : "Falha ao solicitar recuperação.";
+    throw new Error(detalhe);
+  }
+  return corpo;
+}
+

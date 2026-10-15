@@ -101,9 +101,20 @@ const App: React.FC = () => {
         </>
       )}
 
-      {/* 2. Página de Cadastro e Gestão de Professores (GL4-34 / SGA-16) */}
+      {/* 2. Página de Cadastro e Gestão de Professores (GL4-34 / SGA-16) - RBAC protegido */}
       {pagina === "professores" && (
-        <CadastrarProfessor />
+        usuarioLogado && (usuarioLogado.perfil === "docente" || usuarioLogado.perfil === "colegiado" || usuarioLogado.perfil === "ti_suporte") ? (
+          <CadastrarProfessor />
+        ) : (
+          <main style={{ padding: "40px 20px", textAlign: "center", minHeight: "60vh" }}>
+            <div className="alerta alerta-erro" style={{ maxWidth: "500px", margin: "0 auto 20px" }}>
+              ⛔ Acesso Restrito: Seu perfil ({usuarioLogado ? usuarioLogado.perfil : "Visitante"}) não tem permissão para acessar o módulo de cadastro de professores.
+            </div>
+            <button className="btn btn-primario" onClick={() => handleNavegar("home")}>
+              Voltar ao Início
+            </button>
+          </main>
+        )
       )}
 
       {/* 3. Página de Login & Recuperação de Senha (SGA-13 / SGA-14) */}
