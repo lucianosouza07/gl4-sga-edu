@@ -5,7 +5,15 @@ try:
 except ImportError:
     from .professores import router as professores_router
 
-app = FastAPI(title="SGA-Edu | Cadastro de professor", version="0.1.0")
+try:
+    from modulo_30_autenticacao_rbac.auth import router as auth_router
+except ImportError:
+    import sys
+    from pathlib import Path
+    sys.path.append(str(Path(__file__).resolve().parent.parent))
+    from modulo_30_autenticacao_rbac.auth import router as auth_router
+
+app = FastAPI(title="SGA-Edu | API Integrada", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -15,8 +23,10 @@ app.add_middleware(
 )
 
 app.include_router(professores_router)
+app.include_router(auth_router)
 
 
 @app.get("/")
 def raiz():
-    return {"status": "API de professores rodando", "docs": "/docs"}
+    return {"status": "API SGA-Edu rodando", "docs": "/docs"}
+

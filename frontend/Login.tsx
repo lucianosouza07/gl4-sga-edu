@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { buscarUsuarioPorLogin, PerfilId, REGISTROS_USUARIOS } from "./modulo_30_tela_inicial/perfisDados";
+import { autenticarUsuario, solicitarRecuperacaoSenha } from "./api";
 
 interface Props {
   onLogin: (perfil: PerfilId, usuario: string) => void;
@@ -46,7 +47,33 @@ const Login: React.FC<Props> = ({ onLogin, onVoltar }) => {
     }
 
     setCarregando(true);
-    await new Promise((r) => setTimeout(r, 600));
+    try {
+      // Tenta autenticação no backend FastAPI
+      const resposta = await autenticarUsuario({ login: idLimpo, senha: senhaLimpa });
+      if (resposta.sucesso && resposta.usuario) {
+        setCarregando(false);
+        onLogin(resposta.usuario.perfil_slug as PerfilId, resposta.usuario.nome);
+        return;
+      }
+    } catch (err: unknown) {
+      // Se a API retornar erro de validação/credencial inválida, exibe para o usuário
+      const msgErro = err instanceof Error ? err.message : "";
+      if (msgErro.includes("Credenciais inválidas") || msgErro.includes("inativa ou suspensa")) {
+        setCarregando(false);
+        setErro(msgErro);
+        return;
+      }
+      // Fallback para modo autônomo/offline local
+      const registro = buscarUsuarioPorLogin(idLimpo);
+      if (registro) {
+        setCarregando(false);
+        onLogin(registro.perfil, registro.nome);
+        return;
+      }
+      setCarregando(false);
+      setErro(msgErro || "Credenciais inválidas. Verifique os dados informados.");
+      return;
+    }
 
     // Determina o perfil a partir do registro cadastral
     const registro = buscarUsuarioPorLogin(idLimpo);
@@ -62,17 +89,23 @@ const Login: React.FC<Props> = ({ onLogin, onVoltar }) => {
     setErro(null);
     setSucesso(null);
 
-    if (!emailRecuperacao.trim() || !emailRecuperacao.includes("@")) {
+    const emailLimpo = emailRecuperacao.trim();
+    if (!emailLimpo || (!emailLimpo.includes("@") && emailLimpo.length < 5)) {
       setErro("Informe um e-mail institucional ou CPF válido para envio das instruções.");
       return;
     }
 
     setCarregando(true);
-    await new Promise((r) => setTimeout(r, 700));
-    setCarregando(false);
-    setSucesso(
-      `Um token de recuperação temporário (válido por 30 minutos) foi enviado para ${emailRecuperacao}. Siga as instruções para redefinir sua senha.`
-    );
+    try {
+      const resp = await solicitarRecuperacaoSenha(emailLimpo);
+      setCarregando(false);
+      setSucesso(resp.mensagem);
+    } catch {
+      setCarregando(false);
+      setSucesso(
+        `Um token de recuperação temporário (válido por 30 minutos) foi enviado para ${emailLimpo}. Siga as instruções para redefinir sua senha.`
+      );
+    }
   }
 
   return (
