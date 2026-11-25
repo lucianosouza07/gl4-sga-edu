@@ -17,6 +17,7 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": [
+    "vite-env.d.ts",
     "App.tsx",
     "main.tsx",
     "Navbar.tsx",
