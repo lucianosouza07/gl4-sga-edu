@@ -3,8 +3,9 @@
  */
 import type { Professor, ProfessorEntrada } from "./professor";
 
-// Base URL apontando para o FastAPI na porta 8000
-const API_BASE = "http://127.0.0.1:8000/api";
+// Base URL: usa VITE_API_URL em produção (ex: Vercel) ou "/api" (proxy local do Vite)
+const API_ORIGIN = (import.meta.env.VITE_API_URL ?? "").replace(/\/+$/, "");
+const API_BASE = API_ORIGIN ? `${API_ORIGIN}/api` : "/api";
 
 /** Lista todos os professores cadastrados */
 export async function listarProfessores(): Promise<Professor[]> {
