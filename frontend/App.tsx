@@ -23,9 +23,20 @@ export interface UsuarioLogado {
  * 3. O acesso se dá exclusivamente por matrícula e senha (registro define o perfil).
  * 4. Após o login, exibe o painel do perfil correspondente.
  */
+const STORAGE_KEY = "sga_edu_usuario";
+
+function lerUsuarioSalvo(): UsuarioLogado | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as UsuarioLogado) : null;
+  } catch {
+    return null;
+  }
+}
+
 const App: React.FC = () => {
   const [pagina, setPagina] = useState<Pagina>("home");
-  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioLogado | null>(null);
+  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioLogado | null>(lerUsuarioSalvo);
   const [isOnline, setIsOnline] = useState(false);
   const [statusTexto, setStatusTexto] = useState("Verificando...");
 
@@ -49,17 +60,28 @@ const App: React.FC = () => {
 
   function handleEfetuarLogin(perfil: PerfilId, usuario: string) {
     const configPerfil = PERFIS[perfil] || PERFIS.discente;
-    setUsuarioLogado({
+    const novoUsuario: UsuarioLogado = {
       nome: usuario || configPerfil.name,
       perfil: perfil,
       matricula: configPerfil.role,
-    });
+    };
+    setUsuarioLogado(novoUsuario);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(novoUsuario));
+    } catch {
+      // ignora erro de storage
+    }
     setPagina("home");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function handleLogout() {
     setUsuarioLogado(null);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // ignora erro de storage
+    }
     setPagina("home");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
